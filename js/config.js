@@ -35,6 +35,17 @@ P5.config = Object.freeze({
   dbPath: 'db-local-txt/db.txt',
   dbCacheKey: 'p5.db.txt',
 
+  /* Gravação pelo GitHub Pages: cada operação vira um commit no db.txt
+     do repositório (via API do GitHub, com token pessoal informado na
+     sessão — o token NUNCA fica no código). */
+  github: Object.freeze({
+    dono: 'LeoAnDev',
+    repo: 'suzano-p5',
+    branch: 'main',
+    tokenKey: 'p5.gh.token',
+    criarToken: 'https://github.com/settings/personal-access-tokens/new'
+  }),
+
   /* Horário de expediente exibido no painel e nos relatórios */
   horario: Object.freeze({ dias: 'Segunda-feira a Sábado', inicio: '08h00', fim: '18h00' }),
 

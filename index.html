@@ -8,7 +8,7 @@
     />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' http://127.0.0.1:5510; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' http://127.0.0.1:5510 https://api.github.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
     />
     <meta name="referrer" content="no-referrer" />
     <meta name="robots" content="noindex, nofollow" />
@@ -1333,6 +1333,66 @@
           <button value="cancelar" class="btn btn-ghost">Cancelar</button>
           <button value="ok" class="btn btn-danger" id="dialogo-ok">
             <span data-texto>Confirmar</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Conectar ao GitHub (gravação do db.txt pelo GitHub Pages) -->
+    <dialog
+      id="dialogo-github"
+      class="dialogo dialogo-largo"
+      aria-labelledby="gh-titulo"
+      aria-describedby="gh-texto"
+    >
+      <form method="dialog" class="dialogo-corpo" novalidate>
+        <div class="dialogo-icone dialogo-icone-github">
+          <svg class="icon" aria-hidden="true"><use href="#i-link" /></svg>
+        </div>
+        <h2 id="gh-titulo" class="dialogo-titulo">Conectar ao GitHub</h2>
+        <p id="gh-texto" class="dialogo-texto">
+          Para gravar no <code>db.txt</code> do repositório, informe o token de
+          acesso da seção. Ele fica só nesta aba e é apagado ao sair.
+        </p>
+
+        <ol class="gh-passos">
+          <li>
+            Abra
+            <a id="gh-link" href="#" target="_blank" rel="noopener noreferrer"
+              >GitHub → Fine-grained tokens</a
+            >.
+          </li>
+          <li>
+            <strong>Repository access:</strong> Only select repositories →
+            <code>suzano-p5</code>.
+          </li>
+          <li>
+            <strong>Permissions → Contents:</strong> Read and write. Defina uma
+            validade (ex.: 90 dias).
+          </li>
+          <li>Gere o token e cole abaixo (começa com <code>github_pat_</code>).</li>
+        </ol>
+
+        <div class="field">
+          <label class="field-label" for="gh-token">Token de acesso</label>
+          <div class="input-icon">
+            <svg class="icon" aria-hidden="true"><use href="#i-lock" /></svg>
+            <input
+              id="gh-token"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="github_pat_…"
+            />
+          </div>
+        </div>
+        <p id="gh-erro" class="alert alert-danger" role="alert" hidden></p>
+
+        <div class="dialogo-acoes">
+          <button value="cancelar" class="btn btn-ghost">Agora não</button>
+          <button value="ok" class="btn btn-primary" id="gh-ok">
+            <svg class="icon" aria-hidden="true"><use href="#i-link" /></svg>
+            <span data-texto>Conectar</span>
           </button>
         </div>
       </form>

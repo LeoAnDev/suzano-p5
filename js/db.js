@@ -1,17 +1,19 @@
 /* =====================================================================
-   Banco de dados local em TXT (db-local-txt/db.txt)
+   Banco de dados em TXT (db-local-txt/db.txt)
 
    Modos de gravação (escolhidos automaticamente):
-   1. SERVIDOR  — sistema aberto pelo "node servidor.js":
-                  cada operação é gravada DIRETAMENTE no db.txt,
-                  sem nenhuma janela. (Modo recomendado.)
-   2. ARQUIVO   — Chrome/Edge com o db.txt vinculado manualmente na
-                  aba "Banco db.txt" (File System Access API).
-   3. NAVEGADOR — GitHub Pages/Live Server sem vínculo: os dados ficam
-                  no cache do navegador até poderem ser gravados.
+   1. SERVIDOR  — sistema aberto com "node servidor.js" (ou Live Server
+                  com o servidor ligado): grava DIRETAMENTE no db.txt
+                  do computador, sem janelas.
+   2. GITHUB    — GitHub Pages com token conectado: cada operação vira
+                  um COMMIT no db.txt do repositório (API do GitHub).
+                  Só quem tem o token consegue gravar.
+   3. ARQUIVO   — Chrome/Edge com o db.txt vinculado manualmente.
+   4. NAVEGADOR — sem nenhum dos anteriores: os dados ficam no cache do
+                  navegador (pendentes) até poderem ser gravados.
 
    O arquivo é a fonte da verdade: alterações feitas fora do sistema
-   (ex.: editando no VS Code) são detectadas e recarregadas.
+   são detectadas e recarregadas.
 
    Formato: blocos legíveis + uma linha "@registro {json}" por registro.
    ===================================================================== */
@@ -20,15 +22,22 @@
 P5.db = (function () {
   var C = P5.config;
   var U = P5.util;
+  var GH = C.github;
   var PENDENTE_KEY = 'p5.db.pendente';
   var MARCADOR = '@registro ';
   var LARGURA = 72;
   var IDB_NOME = 'p5-escala';
   var IDB_STORE = 'arquivos';
   var API = 'api/db';
+  var API_LOCAL = 'http://127.0.0.1:5510/api/db';
+  var GH_URL = 'https://api.github.com/repos/' + GH.dono + '/' + GH.repo + '/contents/' + C.dbPath;
 
   var registros = [];
   var modoServidor = false;
+  var modoGithub = false;
+  var ghSha = null;               // versão atual do db.txt no repositório
+  var ghEtag = null;
+  var ghUltimoCommit = null;
   var arquivo = null;             // FileSystemFileHandle com permissão
   var arquivoSemPermissao = null; // handle salvo aguardando permissão
   var ultimaModificacao = 0;
@@ -36,6 +45,7 @@ P5.db = (function () {
   var ultimaFalha = '';
   var ouvintes = [];
   var monitor = null;
+  var ciclo = 0;
 
   /* ---------- IndexedDB (guarda o vínculo com o arquivo) ---------- */
   function idb(modo, fn) {
@@ -182,15 +192,22 @@ P5.db = (function () {
   function pendente() { try { return localStorage.getItem(PENDENTE_KEY) === '1'; } catch (e) { return false; } }
   function marcarPendente(v) { try { if (v) localStorage.setItem(PENDENTE_KEY, '1'); else localStorage.removeItem(PENDENTE_KEY); } catch (e) { /* ignora */ } }
 
+  function ehLocal() { return location.protocol === 'http:' && /^(127\.0\.0\.1|localhost)$/.test(location.hostname); }
+
   function estado() {
+    var modo = modoServidor ? 'servidor' : modoGithub ? 'github' : arquivo ? 'arquivo' : 'navegador';
     return {
-      modo: modoServidor ? 'servidor' : arquivo ? 'arquivo' : 'navegador',
+      modo: modo,
       registros: registros.length,
       pendente: pendente(),
-      vinculado: modoServidor || !!arquivo,
-      reconectar: !modoServidor && !arquivo && !!arquivoSemPermissao,
-      nomeArquivo: modoServidor ? C.dbPath : arquivo ? arquivo.name : arquivoSemPermissao ? arquivoSemPermissao.name : null,
-      suportaArquivo: !modoServidor && typeof window.showOpenFilePicker === 'function',
+      vinculado: modo !== 'navegador',
+      reconectar: modo === 'navegador' && !!arquivoSemPermissao,
+      nomeArquivo: modoServidor ? C.dbPath
+        : modoGithub ? GH.dono + '/' + GH.repo + ' → ' + C.dbPath
+        : arquivo ? arquivo.name : arquivoSemPermissao ? arquivoSemPermissao.name : null,
+      suportaArquivo: !modoServidor && !modoGithub && typeof window.showOpenFilePicker === 'function',
+      podeGithub: !modoServidor && !ehLocal() && !!window.fetch,
+      ultimoCommit: ghUltimoCommit,
       erros: ultimosErros,
       falha: ultimaFalha
     };
@@ -199,7 +216,9 @@ P5.db = (function () {
   function cache(texto) { try { localStorage.setItem(C.dbCacheKey, texto); } catch (e) { /* cota */ } }
   function lerCache() { try { return localStorage.getItem(C.dbCacheKey); } catch (e) { return null; } }
 
-  /* ---------- API do servidor local ---------- */
+  /* =================================================================
+     SERVIDOR LOCAL
+     ================================================================= */
   function apiFetch(url, opcoes) {
     opcoes = opcoes || {};
     opcoes.cache = 'no-store';
@@ -215,22 +234,130 @@ P5.db = (function () {
     } catch (e) { return null; }
   }
 
-  /* Procura o servidor local: primeiro na própria origem (node servidor.js);
-     se a página veio do Live Server (localhost), usa o servidor da porta 5510. */
-  var API_LOCAL = 'http://127.0.0.1:5510/api/db';
-  function ehLocal() { return location.protocol === 'http:' && /^(127\.0\.0\.1|localhost)$/.test(location.hostname); }
-
   async function lerApi() {
+    if (!ehLocal()) return null; // no GitHub Pages não há servidor local
     var r = await lerApiEm(API);
     if (r || modoServidor) return r;
-    if (ehLocal() && API !== API_LOCAL) {
+    if (API !== API_LOCAL) {
       r = await lerApiEm(API_LOCAL);
       if (r) API = API_LOCAL;
     }
     return r;
   }
 
-  /* ---------- Inicialização ---------- */
+  /* =================================================================
+     GITHUB (API de conteúdo do repositório)
+     ================================================================= */
+  function tokenGithub() { try { return sessionStorage.getItem(GH.tokenKey); } catch (e) { return null; } }
+
+  function paraBase64(texto) {
+    var bytes = new TextEncoder().encode(texto), bin = '';
+    for (var i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  }
+  function deBase64(b64) {
+    var bin = atob(String(b64 || '').replace(/\s/g, ''));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+
+  function ghFetch(token, opcoes) {
+    opcoes = opcoes || {};
+    opcoes.cache = 'no-store';
+    opcoes.headers = Object.assign({
+      'Accept': 'application/vnd.github+json',
+      'Authorization': 'Bearer ' + token,
+      'X-GitHub-Api-Version': '2022-11-28'
+    }, opcoes.headers || {});
+    return fetch(GH_URL + (opcoes.method && opcoes.method !== 'GET' ? '' : '?ref=' + encodeURIComponent(GH.branch)), opcoes);
+  }
+
+  function erroGithub(status) {
+    if (status === 401) return 'Token do GitHub inválido ou expirado.';
+    if (status === 403) return 'O token não tem permissão de escrita (Contents: Read and write) neste repositório.';
+    if (status === 404) return 'O token não tem acesso ao repositório ' + GH.dono + '/' + GH.repo + '.';
+    return 'GitHub respondeu com erro ' + status + '.';
+  }
+
+  /* Lê o db.txt do repositório. Retorna null se não mudou (ETag). */
+  async function lerGithub(token, usarEtag) {
+    var resp = await ghFetch(token, { headers: usarEtag && ghEtag ? { 'If-None-Match': ghEtag } : {} });
+    if (resp.status === 304) return null;
+    if (resp.status === 404) {
+      // arquivo ainda não existe no repositório? confere se o token enxerga o repositório
+      var repo = await fetch('https://api.github.com/repos/' + GH.dono + '/' + GH.repo, { cache: 'no-store', headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } });
+      if (!repo.ok) throw new Error(erroGithub(repo.status));
+      return { texto: '', sha: null };
+    }
+    if (!resp.ok) throw new Error(erroGithub(resp.status));
+    ghEtag = resp.headers.get('ETag');
+    var j = await resp.json();
+    return { texto: deBase64(j.content), sha: j.sha };
+  }
+
+  async function conectarGithub(token) {
+    token = String(token || '').trim();
+    if (!/^(github_pat_|ghp_|gho_|ghu_)[A-Za-z0-9_]{20,}$/.test(token)) throw new Error('Isso não parece um token do GitHub (começa com "github_pat_").');
+    var remoto = await lerGithub(token, false);
+    try { sessionStorage.setItem(GH.tokenKey, token); } catch (e) { /* ignora */ }
+    modoGithub = true;
+    ghSha = remoto.sha;
+    var lido = interpretar(remoto.texto);
+    var locais = registros;
+    registros = lido.registros;
+    ultimosErros = lido.erros;
+    if (pendente()) {
+      var pend = locais;
+      await operar(function (lista) { return mesclarEm(lista, pend).lista; }, 'sincroniza lançamentos pendentes do navegador');
+    } else if (lido.normalizados) {
+      await operar(function (lista) { return lista; }, 'normaliza o db.txt (maiúsculas)');
+    } else cache(serializar(registros));
+    emitir('github');
+    return true;
+  }
+
+  function desconectarGithub() {
+    try { sessionStorage.removeItem(GH.tokenKey); } catch (e) { /* ignora */ }
+    modoGithub = false;
+    ghSha = null;
+    ghEtag = null;
+    emitir('desvinculado');
+  }
+
+  async function gravarGithub(mensagem, aplicar) {
+    var token = tokenGithub();
+    var sessao = P5.auth.sessaoAtual();
+    var corpoMsg = 'Escala P5: ' + (mensagem || 'atualiza o db.txt') + '\n\nOperação feita no sistema por ' +
+      (sessao ? sessao.usuario : 'usuário não identificado') + ' em ' + U.dataHoraBR(Date.now()) + '.';
+    for (var tentativa = 0; tentativa < 3; tentativa++) {
+      var corpo = { message: corpoMsg, content: paraBase64(serializar(registros)), branch: GH.branch };
+      if (ghSha) corpo.sha = ghSha;
+      var resp = await ghFetch(token, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
+      if (resp.ok) {
+        var j = await resp.json();
+        ghSha = j.content.sha;
+        ghEtag = null;
+        ghUltimoCommit = j.commit && j.commit.html_url;
+        marcarPendente(false);
+        return true;
+      }
+      if ((resp.status === 409 || resp.status === 422) && aplicar) {
+        // alguém gravou antes: relê o repositório e reaplica a operação
+        var remoto = await lerGithub(token, false);
+        ghSha = remoto.sha;
+        registros = aplicar(interpretar(remoto.texto).registros);
+        cache(serializar(registros));
+        continue;
+      }
+      throw new Error(erroGithub(resp.status));
+    }
+    throw new Error('Conflito de gravação repetido no GitHub. Tente de novo.');
+  }
+
+  /* =================================================================
+     INICIALIZAÇÃO
+     ================================================================= */
   async function iniciar() {
     var srv = await lerApi();
     if (srv) {
@@ -239,8 +366,7 @@ P5.db = (function () {
       registros = lido.registros;
       ultimosErros = lido.erros;
       ultimaModificacao = srv.mtime;
-      // alterações que ficaram só no navegador (antes do servidor) são gravadas agora
-      if (pendente()) mesclar(interpretar(lerCache()).registros);
+      if (pendente()) registros = mesclarEm(registros, interpretar(lerCache()).registros).lista;
       if (pendente() || lido.normalizados) await gravar();
       else cache(serializar(registros));
     } else {
@@ -253,12 +379,18 @@ P5.db = (function () {
       registros = l2.registros;
       ultimosErros = l2.erros;
 
-      var h = await idbObter();
-      if (h) {
-        try {
-          if ((await h.queryPermission({ mode: 'readwrite' })) === 'granted') { arquivo = h; await sincronizarComArquivo(); }
-          else arquivoSemPermissao = h;
-        } catch (e) { arquivoSemPermissao = null; }
+      var token = tokenGithub();
+      if (token) {
+        try { await conectarGithub(token); }
+        catch (e) { ultimaFalha = e.message; desconectarGithub(); }
+      } else {
+        var h = await idbObter();
+        if (h) {
+          try {
+            if ((await h.queryPermission({ mode: 'readwrite' })) === 'granted') { arquivo = h; await sincronizarComArquivo(); }
+            else arquivoSemPermissao = h;
+          } catch (e) { arquivoSemPermissao = null; }
+        }
       }
     }
     iniciarMonitor();
@@ -275,7 +407,7 @@ P5.db = (function () {
   async function sincronizarComArquivo() {
     var f = await arquivo.getFile();
     var lido = interpretar(await f.text());
-    if (pendente()) { mesclar(lido.registros); await gravar(); }
+    if (pendente()) { registros = mesclarEm(lido.registros, registros).lista; await gravar(); }
     else {
       registros = lido.registros;
       ultimosErros = lido.erros;
@@ -294,8 +426,6 @@ P5.db = (function () {
     document.addEventListener('visibilitychange', verificar);
   }
 
-  var verificando = false;
-  /* Servidor local ligado depois da página aberta: conecta e grava o que estava pendente */
   async function tentarServidor() {
     var srv = await lerApi();
     if (!srv) return;
@@ -305,22 +435,29 @@ P5.db = (function () {
     registros = lido.registros;
     ultimosErros = lido.erros;
     ultimaModificacao = srv.mtime;
-    if (pendente()) mesclar(locais);
+    if (pendente()) registros = mesclarEm(registros, locais).lista;
     if (pendente() || lido.normalizados) await gravar();
     else cache(serializar(registros));
     emitir('servidor');
   }
 
+  var verificando = false;
   async function verificarExterno() {
     if (verificando) return;
-    if (!modoServidor && !arquivo) {
-      if (!ehLocal()) return;
-      verificando = true;
-      try { await tentarServidor(); } finally { verificando = false; }
-      return;
-    }
     verificando = true;
     try {
+      if (modoGithub) {
+        if (++ciclo % 4 !== 0) return; // GitHub: a cada ~12 s (requisições 304 não gastam cota)
+        var remoto = await lerGithub(tokenGithub(), true);
+        if (remoto && remoto.sha !== ghSha) {
+          ghSha = remoto.sha;
+          aplicarExterno(remoto.texto);
+          if (interpretar(remoto.texto).normalizados) await operar(function (l) { return l; }, 'normaliza o db.txt (maiúsculas)');
+        }
+        return;
+      }
+      if (!modoServidor && !arquivo) { if (ehLocal()) await tentarServidor(); return; }
+
       var texto = null, mtime = 0;
       if (modoServidor) {
         var info = await (await apiFetch(API + '/info')).json();
@@ -330,25 +467,47 @@ P5.db = (function () {
         if (f.lastModified !== ultimaModificacao) { texto = await f.text(); mtime = f.lastModified; }
       }
       if (texto != null) {
-        var lido = interpretar(texto);
-        registros = lido.registros;
-        ultimosErros = lido.erros;
         ultimaModificacao = mtime;
-        cache(serializar(registros));
-        marcarPendente(false);
-        if (lido.normalizados) await gravar(); // mantém o .txt sempre em MAIÚSCULAS
-        emitir('externo');
+        aplicarExterno(texto);
+        if (interpretar(texto).normalizados) await gravar(); // mantém o .txt sempre em MAIÚSCULAS
       }
     } catch (e) {
-      if (!modoServidor) { arquivoSemPermissao = arquivo; arquivo = null; emitir('desconectado'); }
+      if (arquivo) { arquivoSemPermissao = arquivo; arquivo = null; emitir('desconectado'); }
     } finally { verificando = false; }
   }
 
-  /* ---------- Gravação imediata ---------- */
-  async function gravar() {
+  function aplicarExterno(texto) {
+    var lido = interpretar(texto);
+    registros = lido.registros;
+    ultimosErros = lido.erros;
+    cache(serializar(registros));
+    marcarPendente(false);
+    emitir('externo');
+  }
+
+  /* =================================================================
+     GRAVAÇÃO
+     ================================================================= */
+  /* Aplica uma operação e grava. "aplicar" recebe uma lista e devolve a nova
+     lista — no GitHub ela é reaplicada se houver conflito de versões. */
+  async function operar(aplicar, mensagem) {
+    registros = aplicar(registros.slice());
+    return gravar(mensagem, aplicar);
+  }
+
+  async function gravar(mensagem, aplicar) {
     var texto = serializar(registros);
     cache(texto);
     ultimaFalha = '';
+
+    if (modoGithub) {
+      try { return await gravarGithub(mensagem, aplicar); }
+      catch (e) {
+        ultimaFalha = e.message + ' A alteração ficou salva no navegador.';
+        marcarPendente(true);
+        return false;
+      }
+    }
 
     if (modoServidor) {
       try {
@@ -385,9 +544,8 @@ P5.db = (function () {
   /* ---------- Vínculo manual (modo ARQUIVO) ---------- */
   var TIPOS = [{ description: 'Banco de dados TXT', accept: { 'text/plain': ['.txt'] } }];
 
-  /* Reautoriza um arquivo já vinculado (só um aviso de permissão, sem seletor) */
   async function reconectar() {
-    if (modoServidor || arquivo) return true;
+    if (modoServidor || modoGithub || arquivo) return true;
     if (!arquivoSemPermissao) return false;
     if ((await arquivoSemPermissao.requestPermission({ mode: 'readwrite' })) !== 'granted') return false;
     arquivo = arquivoSemPermissao;
@@ -405,7 +563,7 @@ P5.db = (function () {
     arquivoSemPermissao = null;
     await idbGravar(h);
     var lido = interpretar(await (await h.getFile()).text());
-    mesclar(lido.registros);
+    registros = mesclarEm(registros, lido.registros).lista;
     ultimosErros = lido.erros;
     await gravar();
     emitir('vinculado');
@@ -413,29 +571,33 @@ P5.db = (function () {
   }
 
   async function desvincular() {
+    if (modoGithub) { desconectarGithub(); return; }
     arquivo = null;
     arquivoSemPermissao = null;
     await idbApagar();
     emitir('desvinculado');
   }
 
-  function mesclar(novos) {
-    var res = { novos: 0, atualizados: 0 };
+  /* Mescla "novos" em "lista" (por ID; prevalece a versão mais recente) */
+  function mesclarEm(lista, novos) {
+    var res = { lista: lista.slice(), novos: 0, atualizados: 0 };
     novos.forEach(function (n) {
-      var i = registros.findIndex(function (r) { return r.id === n.id; });
-      if (i === -1) { registros.push(n); res.novos++; }
-      else if (n.atualizadoEm > registros[i].atualizadoEm) { registros[i] = n; res.atualizados++; }
+      var i = res.lista.findIndex(function (r) { return r.id === n.id; });
+      if (i === -1) { res.lista.push(n); res.novos++; }
+      else if (n.atualizadoEm > res.lista[i].atualizadoEm) { res.lista[i] = n; res.atualizados++; }
     });
     return res;
   }
 
-  /* ---------- Regras de integridade (sem datas retroativas) ----------
+  /* ---------- Regras de integridade ----------
      • Não se lança nem se altera escala com data anterior a hoje.
      • Registro cujo período já começou fica bloqueado (sem editar/excluir).
      • RG Militar com 5 a 6 dígitos. */
   function bloqueado(r) { return !!r && r.inicio < U.hojeISO(); }
 
-  /* ---------- CRUD ---------- */
+  /* =================================================================
+     CRUD
+     ================================================================= */
   function todos() { return registros.slice().sort(comparar); }
   function obter(id) { return registros.find(function (r) { return r.id === id; }) || null; }
 
@@ -447,31 +609,43 @@ P5.db = (function () {
     }) || null;
   }
 
+  function descrever(r) {
+    return r.grad + ' ' + r.nome + ' (RG ' + r.rg + ') — Semana ' + r.semana + ', ' + U.br(r.inicio) + ' a ' + U.br(r.termino) + ', ' + C.tipos[r.tipo].label;
+  }
+
   async function salvar(rec) {
     var limpo = sanitizar(rec);
     if (!limpo) throw new Error('Registro inválido.');
     var hoje = U.hojeISO();
-    var i = registros.findIndex(function (r) { return r.id === limpo.id; });
-    if (i !== -1 && bloqueado(registros[i])) throw new Error('Este lançamento já começou e está bloqueado para alterações.');
+    var atual = obter(limpo.id);
+    if (atual && bloqueado(atual)) throw new Error('Este lançamento já começou e está bloqueado para alterações.');
     if (limpo.inicio < hoje || limpo.termino < hoje) throw new Error('Não é permitido lançar datas anteriores a hoje (' + U.br(hoje) + ').');
     if (!/^[0-9]{5,6}$/.test(limpo.rg)) throw new Error('O RG Militar deve ter de 5 a 6 dígitos.');
 
     var agora = Date.now();
-    var novo = i === -1;
+    var novo = !atual;
     limpo.atualizadoEm = agora;
-    if (novo) { limpo.criadoEm = agora; registros.push(limpo); }
-    else { limpo.criadoEm = registros[i].criadoEm; registros[i] = limpo; }
-    var gravou = await gravar();
+    limpo.criadoEm = atual ? atual.criadoEm : agora;
+    var aplicar = function (lista) {
+      var j = lista.findIndex(function (r) { return r.id === limpo.id; });
+      var copia = lista.slice();
+      if (j === -1) copia.push(limpo);
+      else { limpo.criadoEm = copia[j].criadoEm; copia[j] = limpo; }
+      return copia;
+    };
+    var gravou = await operar(aplicar, (novo ? 'inclui ' : 'altera ') + descrever(limpo));
     emitir(novo ? 'incluido' : 'alterado');
-    return { registro: limpo, novo: novo, gravouArquivo: gravou, falha: ultimaFalha };
+    return { registro: limpo, novo: novo, gravouArquivo: gravou, falha: ultimaFalha, modo: estado().modo };
   }
 
   async function remover(id) {
-    if (bloqueado(obter(id))) throw new Error('Este lançamento já começou e não pode ser excluído.');
-    registros = registros.filter(function (r) { return r.id !== id; });
-    var gravou = await gravar();
+    var atual = obter(id);
+    if (bloqueado(atual)) throw new Error('Este lançamento já começou e não pode ser excluído.');
+    var gravou = await operar(function (lista) {
+      return lista.filter(function (r) { return r.id !== id; });
+    }, 'exclui ' + (atual ? descrever(atual) : id));
     emitir('excluido');
-    return { gravouArquivo: gravou, falha: ultimaFalha };
+    return { gravouArquivo: gravou, falha: ultimaFalha, modo: estado().modo };
   }
 
   /* ---------- Exportar / importar ---------- */
@@ -486,25 +660,23 @@ P5.db = (function () {
     emitir('baixado');
   }
 
+  async function importarTexto(texto, mensagem) {
+    var lido = interpretar(texto);
+    var stats = mesclarEm(registros, lido.registros);
+    var gravou = await operar(function (lista) { return mesclarEm(lista, lido.registros).lista; }, mensagem);
+    emitir('importado');
+    return { novos: stats.novos, atualizados: stats.atualizados, erros: lido.erros, gravouArquivo: gravou };
+  }
+
   async function importar(file) {
     if (!file || file.size > 5 * 1024 * 1024) throw new Error('Arquivo inválido ou maior que 5 MB.');
-    var lido = interpretar(await file.text());
-    var res = mesclar(lido.registros);
-    res.erros = lido.erros;
-    res.gravouArquivo = await gravar();
-    emitir('importado');
-    return res;
+    return importarTexto(await file.text(), 'importa registros de ' + file.name);
   }
 
   async function recarregarServidor() {
     var texto = modoServidor ? (await lerApi() || {}).texto : await lerServidorEstatico();
     if (texto == null) throw new Error('Não foi possível ler ' + C.dbPath + '.');
-    var lido = interpretar(texto);
-    var res = mesclar(lido.registros);
-    res.erros = lido.erros;
-    res.gravouArquivo = await gravar();
-    emitir('importado');
-    return res;
+    return importarTexto(texto, 'mescla registros do db.txt publicado');
   }
 
   function texto() { return serializar(registros); }
@@ -514,6 +686,7 @@ P5.db = (function () {
     todos: todos, obter: obter, salvar: salvar, remover: remover,
     conflito: conflito, bloqueado: bloqueado, agrupar: agrupar,
     reconectar: reconectar, vincular: vincular, desvincular: desvincular,
+    conectarGithub: conectarGithub, desconectarGithub: desconectarGithub,
     baixar: baixar, importar: importar, recarregarServidor: recarregarServidor, texto: texto
   };
 })();

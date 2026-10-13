@@ -79,6 +79,52 @@
     });
   }
 
+  /* ---------- Janela "Conectar ao GitHub" ---------- */
+  var dlgGh = $('#dialogo-github');
+  $('#gh-link').href = C.github.criarToken;
+  function fecharGh(valor) {
+    if (!dlgGh.open || dlgGh.classList.contains('fechando')) return;
+    dlgGh.classList.add('fechando');
+    setTimeout(function () { dlgGh.classList.remove('fechando'); dlgGh.close(valor); }, reduzMovimento ? 0 : 200);
+  }
+  $('form', dlgGh).addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!e.submitter || e.submitter.value !== 'ok') { fecharGh('cancelar'); return; }
+    var erro = $('#gh-erro'), btn = $('#gh-ok'), campo = $('#gh-token');
+    erro.hidden = true;
+    btn.disabled = true;
+    $('[data-texto]', btn).textContent = 'Conectando…';
+    try {
+      await P5.db.conectarGithub(campo.value);
+      campo.value = '';
+      fecharGh('ok');
+    } catch (err) {
+      erro.textContent = err.message;
+      erro.hidden = false;
+      campo.focus();
+    } finally {
+      btn.disabled = false;
+      $('[data-texto]', btn).textContent = 'Conectar';
+    }
+  });
+  dlgGh.addEventListener('cancel', function (e) { e.preventDefault(); fecharGh('cancelar'); });
+  dlgGh.addEventListener('click', function (e) { if (e.target === dlgGh) fecharGh('cancelar'); });
+
+  /* Abre a janela e resolve true se conectou */
+  function abrirGithub() {
+    $('#gh-erro').hidden = true;
+    $('#gh-token').value = '';
+    dlgGh.returnValue = '';
+    dlgGh.showModal();
+    $('#gh-token').focus();
+    return new Promise(function (resolve) {
+      dlgGh.addEventListener('close', function fim() {
+        dlgGh.removeEventListener('close', fim);
+        resolve(dlgGh.returnValue === 'ok');
+      });
+    });
+  }
+
   function popularSelects(raiz) {
     $$('select[data-graduacoes]', raiz).forEach(function (s) {
       C.graduacoes.forEach(function (g) { s.appendChild(el('option', { value: g, text: g })); });
@@ -251,6 +297,8 @@
       toast('O lançamento em edição foi removido do db.txt.', 'aviso');
     }
     if (est.evento === 'externo') toast('O db.txt foi alterado fora do sistema. Dados recarregados.' + (est.erros ? ' ' + est.erros + ' linha(s) inválida(s) ignorada(s).' : ''), est.erros ? 'aviso' : 'info');
+    if (est.evento === 'github') toast('Conectado ao GitHub. Cada operação vira um commit no db.txt do repositório.', 'sucesso');
+    if (est.evento === 'inicio' && est.falha) toast(est.falha + ' Conecte de novo ao GitHub.', 'aviso');
     if (est.evento === 'servidor') toast('Servidor local conectado. ' + (est.pendente ? 'Há alterações pendentes.' : 'Os lançamentos foram gravados no db.txt.'), est.pendente ? 'aviso' : 'sucesso');
     if (est.evento === 'desconectado') toast('O vínculo com o db.txt foi perdido. Clique no indicador do topo para reconectar.', 'aviso');
   }
@@ -329,11 +377,14 @@
     if (est.vinculado && !est.pendente) { pill.classList.add('pill-ok'); txt.textContent = 'db.txt gravando'; pill.title = 'Cada operação é gravada imediatamente em ' + est.nomeArquivo; }
     else if (est.reconectar) { pill.classList.add('pill-aviso'); txt.textContent = 'Reconectar db.txt'; pill.title = 'Clique para autorizar novamente a gravação no db.txt'; }
     else if (est.pendente) { pill.classList.add('pill-aviso'); txt.textContent = 'Pendente: db.txt'; pill.title = est.falha || 'Há alterações salvas só no navegador'; }
+    else if (est.podeGithub) { pill.classList.add('pill-aviso'); txt.textContent = 'Conectar GitHub'; pill.title = 'Clique para informar o token e gravar no db.txt do repositório'; }
     else { txt.textContent = 'Só no navegador'; pill.title = 'Abra o sistema pelo servidor local (node servidor.js) para gravar direto no db.txt'; }
+    if (est.modo === 'github' && !est.pendente) { txt.textContent = 'GitHub gravando'; }
   }
 
   $('#status-db').addEventListener('click', async function () {
     var est = P5.db.estado();
+    if (est.modo === 'navegador' && est.podeGithub) { await abrirGithub(); return; }
     if (est.reconectar) {
       try { if (await P5.db.reconectar()) toast('db.txt reconectado. As operações serão gravadas imediatamente.', 'sucesso'); }
       catch (e) { toast(e.message, 'erro'); }
@@ -344,14 +395,18 @@
 
   /* Antes de gravar: só reautoriza um arquivo já vinculado (nunca abre seletor de arquivo) */
   async function prepararArquivo() {
-    if (!P5.db.estado().reconectar) return;
+    var est = P5.db.estado();
+    if (est.modo === 'navegador' && est.podeGithub) { await abrirGithub(); return; }
+    if (!est.reconectar) return;
     try { await P5.db.reconectar(); } catch (e) { /* segue gravando no navegador */ }
   }
 
   var AVISO_SEM_ARQUIVO = 'Salvo apenas no navegador. Para gravar direto no db.txt, abra o sistema pelo servidor local: node servidor.js';
   function avisoGravacao(r, acao) {
-    if (r.gravouArquivo) toast(acao + ' e gravado no db.txt.', 'sucesso');
-    else toast(acao + '. ' + (r.falha || AVISO_SEM_ARQUIVO), 'aviso');
+    if (r.gravouArquivo) toast(acao + (r.modo === 'github' ? ' e gravado no db.txt do repositório (commit no GitHub).' : ' e gravado no db.txt.'), 'sucesso');
+    else toast(acao + '. ' + (r.falha || (P5.db.estado().podeGithub
+      ? 'Salvo apenas no navegador. Conecte ao GitHub (indicador no topo) para gravar no db.txt do repositório.'
+      : AVISO_SEM_ARQUIVO)), 'aviso');
   }
 
   /* =================================================================
@@ -898,6 +953,7 @@
     var dl = U.esvaziar($('#banco-estado'));
     var modos = {
       servidor: 'Servidor local — gravação direta, sem janelas',
+      github: 'GitHub — cada operação vira um commit no repositório',
       arquivo: 'Arquivo vinculado no navegador',
       navegador: 'Somente no navegador (sem gravação no arquivo)'
     };
@@ -909,11 +965,15 @@
       ['Situação', est.pendente ? (est.falha || 'Há alterações salvas só no navegador') : est.vinculado ? 'Sincronizado' : '—']
     ].forEach(function (kv) { dl.appendChild(el('dt', { text: kv[0] })); dl.appendChild(el('dd', { text: kv[1] })); });
 
-    $('[data-texto]', $('#btn-vincular')).textContent = est.modo === 'arquivo' ? 'Trocar arquivo' : est.reconectar ? 'Reconectar db.txt' : 'Vincular db.txt';
-    $('#btn-vincular').disabled = !est.suportaArquivo;
-    $('#btn-desvincular').disabled = est.modo !== 'arquivo' && !est.reconectar;
+    $('[data-texto]', $('#btn-vincular')).textContent = est.podeGithub
+      ? (est.modo === 'github' ? 'Trocar token do GitHub' : 'Conectar ao GitHub')
+      : est.modo === 'arquivo' ? 'Trocar arquivo' : est.reconectar ? 'Reconectar db.txt' : 'Vincular db.txt';
+    $('#btn-vincular').disabled = !est.suportaArquivo && !est.podeGithub;
+    $('#btn-desvincular').disabled = est.modo !== 'arquivo' && est.modo !== 'github' && !est.reconectar;
     $('#banco-suporte').textContent = est.modo === 'servidor'
       ? 'Tudo certo: o servidor local grava cada operação direto em db-local-txt/db.txt.'
+      : est.modo === 'github' ? 'Tudo certo: cada inclusão, alteração e exclusão é gravada como commit no db.txt do repositório. O token fica só nesta aba e é apagado ao sair.'
+      : est.podeGithub ? 'No GitHub Pages, conecte ao GitHub com o token da seção para gravar no db.txt do repositório.'
       : 'Recomendado: no terminal do VS Code, rode "node servidor.js" e abra http://127.0.0.1:5510/ para gravar direto no db.txt, sem janelas. Alternativa (Chrome/Edge): "Vincular db.txt".';
     $('#banco-preview').textContent = P5.db.texto();
   }
@@ -925,6 +985,7 @@
   $('#btn-vincular').addEventListener('click', async function () {
     try {
       var est = P5.db.estado();
+      if (est.podeGithub) { await abrirGithub(); return; }
       if (est.reconectar) await P5.db.reconectar();
       else await P5.db.vincular();
       toast('db.txt vinculado. As operações serão gravadas imediatamente.', 'sucesso');

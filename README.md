@@ -159,7 +159,9 @@ O indicador no topo mostra a situação do arquivo:
 
 | Indicador | Significado |
 | --- | --- |
-| **db.txt gravando** (verde) | Cada operação é gravada na hora no `db.txt` |
+| **db.txt gravando** (verde) | Cada operação é gravada na hora no `db.txt` (servidor local) |
+| **GitHub gravando** (verde) | Cada operação vira um commit no `db.txt` do repositório |
+| **Conectar GitHub** (laranja) | No GitHub Pages, sem token. Clique para conectar |
 | **Só no navegador** | O sistema não foi aberto pelo `servidor.js`. Os dados ficam só no navegador |
 | **Pendente: db.txt** (laranja) | Há alterações só no navegador. Ao abrir pelo servidor, elas são gravadas automaticamente |
 | **Reconectar db.txt** (laranja) | Modo "arquivo vinculado": o navegador pede nova autorização. Clique para conceder |
@@ -175,13 +177,37 @@ Cada **inclusão, alteração ou exclusão** é gravada **na hora** no `db.txt`,
 | Modo | Quando | Como grava |
 | --- | --- | --- |
 | **Servidor** (recomendado) | Aberto por `node servidor.js` | Direto no `db-local-txt/db.txt`, **sem janelas**. Gravação atômica (arquivo temporário + troca), sem risco de corromper o arquivo |
+| **GitHub** | GitHub Pages com o token da seção conectado | Cada operação vira um **commit** no `db.txt` do repositório, pela API do GitHub |
 | **Arquivo vinculado** | Chrome/Edge, sem servidor, após **Banco db.txt → Vincular db.txt** | Direto no arquivo escolhido (o vínculo fica guardado no navegador) |
-| **Navegador** | GitHub Pages ou Live Server sem vínculo | Só no cache do navegador. As alterações ficam **pendentes** e são gravadas no `db.txt` quando o sistema for aberto pelo servidor |
+| **Navegador** | Nenhum dos anteriores | Só no cache do navegador. As alterações ficam **pendentes** e são gravadas no `db.txt` assim que houver servidor ou token conectado |
 
 - **O arquivo manda:** se o `db.txt` for alterado fora do sistema (por exemplo, editado no VS Code), o sistema percebe em até 3 segundos e recarrega os dados na tela.
 - **Nada se perde:** os dados também ficam em cache no navegador (`localStorage`). Se o servidor cair, a alteração fica pendente e o toast avisa.
 
-> No **GitHub Pages** não há servidor, então o site não consegue gravar no repositório. Para publicar dados novos, faça commit do `db.txt` gravado localmente.
+### Gravação pelo GitHub Pages (token)
+
+No GitHub Pages, o sistema grava no `db.txt` do repositório pela **API oficial do GitHub**. Cada inclusão, alteração ou exclusão vira um **commit**. A mensagem diz o que foi feito, por quem e quando, e o histórico de commits funciona como trilha de auditoria.
+
+**Só grava quem tem o token.** Mesmo que alguém contorne a tela de login, sem o token o GitHub recusa a gravação: a verificação é feita pelos servidores do GitHub, não pelo navegador.
+
+**Como criar o token da seção** (uma vez, pelo dono do repositório):
+
+1. Acesse <https://github.com/settings/personal-access-tokens/new> (*Fine-grained token*).
+2. **Token name:** `Escala P5`. **Expiration:** por exemplo, 90 dias.
+3. **Repository access:** *Only select repositories* → `suzano-p5`.
+4. **Permissions → Repository permissions → Contents:** *Read and write*. Não marque mais nada.
+5. Clique em **Generate token** e copie o valor (começa com `github_pat_`).
+
+**Como usar:** na primeira gravação, ou ao clicar no indicador **Conectar GitHub** no topo, o sistema abre a janela **Conectar ao GitHub**. Cole o token e confirme.
+
+| Cuidado | Por quê |
+| --- | --- |
+| O token **nunca** vai para o código, o README, issues ou commits | Quem tiver o token consegue alterar o `db.txt` |
+| Ele fica só na aba aberta (`sessionStorage`) e é apagado ao clicar em **Sair** | Fechar a aba também apaga |
+| Em caso de vazamento, revogue em **GitHub → Settings → Developer settings → Personal access tokens** | Gere outro em seguida |
+| O `db.txt` do repositório público é **legível por qualquer pessoa** | A escrita é protegida, a leitura não |
+
+Se duas pessoas gravarem ao mesmo tempo, o sistema relê o `db.txt` do repositório, reaplica a operação e grava de novo, sem perder o lançamento do outro. A tela mostra a gravação na hora; a cópia publicada no Pages se atualiza em 1 a 2 minutos.
 
 ### Formato
 
@@ -292,11 +318,12 @@ A barra de endereços mostra **somente o endereço base**, sem `#`, sem `index.h
 - **Content-Security-Policy** restrita: só recursos do próprio site, sem `inline` e sem `eval`.
 - **Sem `innerHTML` com dados:** o texto é inserido via `textContent`.
 - **Observações sanitizadas por lista branca:** só formatação básica (`p`, `strong`, `em`, `u`, `s`, listas, citação). Scripts, atributos, estilos e links são descartados ao salvar, ao colar e ao ler o `db.txt`.
+- **Gravação no Pages protegida pelo GitHub:** só grava quem tem o token pessoal (escopo limitado ao repositório, só *Contents*, com validade). O token fica apenas na sessão da aba e nunca no código.
 - **Regras de datas** aplicadas na camada de dados (veja [Regras de integridade](#regras-de-integridade-datas)).
 
 ### Limitações de um sistema 100% front-end
 
-- O login é uma barreira de interface, não um controle de acesso de servidor.
+- O login da tela é uma barreira de interface. A proteção real da **escrita** no Pages é o token do GitHub.
 - Num repositório **público**, o `db.txt` publicado fica visível para qualquer pessoa. Para dados sensíveis, use um repositório **privado** ou **não faça commit** do `db.txt` com dados reais.
 
 ---
