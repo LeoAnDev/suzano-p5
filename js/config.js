@@ -37,8 +37,9 @@ P5.config = Object.freeze({
   dbCacheKey: 'p5.db.txt',
 
   /* Gravação pelo GitHub Pages: cada operação vira um commit no db.txt
-     do repositório (via API do GitHub, com token pessoal informado na
-     sessão — o token NUNCA fica no código). */
+     do repositório (via API do GitHub, com token pessoal).
+     No Pages, dono e repositório são detectados pelo endereço do site;
+     os valores abaixo valem só fora do Pages (ex.: servidor local). */
   github: Object.freeze({
     dono: 'LeoAnDev',
     repo: 'suzano-p5',

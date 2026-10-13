@@ -23,8 +23,16 @@ const readline = require('readline');
 
 const CONFIG = path.join(__dirname, 'js', 'config.js');
 const ITERACOES = 310000; // recomendação OWASP para PBKDF2-SHA-256
-const DONO = 'LeoAnDev';
-const REPO = 'suzano-p5';
+/* Repositório detectado pelo "git remote" da pasta (funciona em qualquer conta) */
+function repoDoGit() {
+  try {
+    const url = require('child_process').execSync('git remote get-url origin', { cwd: __dirname, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    const m = url.match(/github\.com[/:]([^/]+)\/([^/]+?)(?:\.git)?$/i);
+    if (m) return { dono: m[1], repo: m[2] };
+  } catch (e) { /* sem git: usa o padrão */ }
+  return { dono: 'LeoAnDev', repo: 'suzano-p5' };
+}
+const { dono: DONO, repo: REPO } = repoDoGit();
 
 function hash(texto, saltHex) {
   return crypto.pbkdf2Sync(texto, Buffer.from(saltHex, 'hex'), ITERACOES, 32, 'sha256').toString('hex');
@@ -96,7 +104,7 @@ async function verificarToken(token) {
 
 /* node gerar-credenciais.js --testar  → só testa o token, não altera nada */
 async function testarApenas() {
-  console.log('\n  ESCALA P5 • testar token do GitHub\n');
+  console.log('\n  ESCALA P5 • testar token do GitHub (' + DONO + '/' + REPO + ')\n');
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: !!process.stdin.isTTY });
   try {
     const token = (await perguntar(rl, '  Cole o token (não aparece na tela): ', true)).trim();
@@ -146,7 +154,7 @@ async function principal() {
       if (conf !== senha) throw new Error('As senhas não conferem.');
     }
 
-    console.log('\n  Token do GitHub (github_pat_…) para gravar no db.txt pelo Pages.');
+    console.log('\n  Token do GitHub (github_pat_…) para gravar no db.txt de ' + DONO + '/' + REPO + ' pelo Pages.');
     console.log('  Deixe em branco para não usar gravação pelo Pages.');
     const token = (await perguntar(rl, '  Token: ', true)).trim();
     if (token) {

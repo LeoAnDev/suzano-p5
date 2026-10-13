@@ -86,6 +86,7 @@
   /* ---------- Janela "Conectar ao GitHub" ---------- */
   var dlgGh = $('#dialogo-github');
   $('#gh-link').href = C.github.criarToken;
+  $('#gh-repo-nome').textContent = P5.db.repoGithub().split('/')[1];
   function fecharGh(valor) {
     if (!dlgGh.open || dlgGh.classList.contains('fechando')) return;
     dlgGh.classList.add('fechando');

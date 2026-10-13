@@ -22,7 +22,20 @@
 P5.db = (function () {
   var C = P5.config;
   var U = P5.util;
-  var GH = C.github;
+  /* Repositório onde o db.txt é gravado: detectado pelo endereço do Pages
+     (dono.github.io/repositorio). Fora do Pages, usa P5.config.github.
+     Assim o mesmo código funciona em qualquer conta sem editar nada. */
+  function repoDoSite(cfg) {
+    var h = location.hostname.toLowerCase();
+    if (/\.github\.io$/.test(h)) {
+      var dono = h.replace(/\.github\.io$/, '');
+      var seg = location.pathname.split('/').filter(Boolean)[0];
+      var repo = seg && !/\.html?$/i.test(seg) ? seg : h; // site de usuário: dono.github.io
+      return Object.assign({}, cfg, { dono: dono, repo: repo });
+    }
+    return cfg;
+  }
+  var GH = repoDoSite(C.github);
   var PENDENTE_KEY = 'p5.db.pendente';
   var MARCADOR = '@registro ';
   var LARGURA = 72;
@@ -695,6 +708,7 @@ P5.db = (function () {
     todos: todos, obter: obter, salvar: salvar, remover: remover,
     conflito: conflito, bloqueado: bloqueado, agrupar: agrupar,
     reconectar: reconectar, vincular: vincular, desvincular: desvincular,
+    repoGithub: function () { return GH.dono + '/' + GH.repo; },
     conectarGithub: conectarGithub, desconectarGithub: desconectarGithub,
     baixar: baixar, importar: importar, recarregarServidor: recarregarServidor, texto: texto
   };
