@@ -52,6 +52,11 @@ P5.config = Object.freeze({
 
   semanas: Object.freeze([1, 2]),
 
+  /* Ciclo quinzenal da escala: a semana (segunda a domingo) que começa
+     nesta data é a SEMANA 1; a seguinte é a SEMANA 2, e assim alternam.
+     A semana de cada lançamento é calculada pela Data Início. */
+  cicloInicio: '2026-10-12',
+
   /* Tipo de escala: rótulo, grupo, ícone (sprite SVG) e classe do badge */
   tipos: Object.freeze({
     expediente:  { label: 'Expediente',        grupo: 'Carga horária', icon: 'i-briefcase', badge: 'badge-expediente' },

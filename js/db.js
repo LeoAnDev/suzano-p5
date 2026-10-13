@@ -73,7 +73,7 @@ P5.db = (function () {
     if (!r || typeof r !== 'object') return null;
     var rec = {
       id: RE_ID.test(r.id || '') ? r.id : U.uid('e'),
-      semana: Number(r.semana) === 2 ? 2 : 1,
+      semana: U.deISO(r.inicio) ? U.semanaDoCiclo(r.inicio) : (Number(r.semana) === 2 ? 2 : 1), // sempre coerente com as datas
       tipo: C.tipos[r.tipo] ? r.tipo : 'expediente',
       inicio: U.deISO(r.inicio) ? r.inicio : '',
       termino: U.deISO(r.termino) ? r.termino : '',
@@ -171,7 +171,7 @@ P5.db = (function () {
         var novos = Array.isArray(obj.semanas) ? migrarAntigo(obj) : [sanitizar(obj)];
         novos.forEach(function (r) {
           if (!r) { erros++; return; }
-          if (r.nome !== obj.nome || r.observacoes !== (obj.observacoes || '')) normalizados++;
+          if (r.nome !== obj.nome || r.observacoes !== (obj.observacoes || '') || r.semana !== Number(obj.semana)) normalizados++;
           if (vistos[r.id]) return;
           vistos[r.id] = 1;
           lista.push(r);
@@ -629,6 +629,7 @@ P5.db = (function () {
     if (atual && bloqueado(atual)) throw new Error('Este lançamento já começou e está bloqueado para alterações.');
     if (limpo.inicio < hoje || limpo.termino < hoje) throw new Error('Não é permitido lançar datas anteriores a hoje (' + U.br(hoje) + ').');
     if (!/^[0-9]{5,6}$/.test(limpo.rg)) throw new Error('O RG Militar deve ter de 5 a 6 dígitos.');
+    if (limpo.termino > U.domingoDaSemana(limpo.inicio)) throw new Error('O lançamento deve ficar dentro de uma única semana (até domingo, ' + U.br(U.domingoDaSemana(limpo.inicio)) + ').');
 
     var agora = Date.now();
     var novo = !atual;

@@ -23,6 +23,23 @@ P5.util = (function () {
     return paraISO(d);
   }
   function hojeISO() { return paraISO(new Date()); }
+
+  /* Segunda e domingo da semana (segunda a domingo) que contém a data */
+  function segundaDaSemana(iso) {
+    var d = deISO(iso);
+    if (!d) return '';
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return paraISO(d);
+  }
+  function domingoDaSemana(iso) { return somarDias(segundaDaSemana(iso), 6); }
+
+  /* Semana 1 ou 2 do ciclo quinzenal (âncora: P5.config.cicloInicio) */
+  function semanaDoCiclo(iso) {
+    var seg = segundaDaSemana(iso);
+    if (!seg) return 1;
+    var n = Math.round((deISO(seg) - deISO(segundaDaSemana(C.cicloInicio))) / 86400000 / 7);
+    return ((n % 2) + 2) % 2 === 0 ? 1 : 2;
+  }
   function br(iso) {
     var d = deISO(iso);
     return d ? String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() : '—';
@@ -119,6 +136,7 @@ P5.util = (function () {
     deISO: deISO, paraISO: paraISO, somarDias: somarDias, hojeISO: hojeISO, br: br, brCurto: brCurto,
     diaSemana: diaSemana, diaCurto: diaCurto, ehDomingo: ehDomingo, diasEntre: diasEntre, dataHoraBR: dataHoraBR,
     normalizar: normalizar, limpar: limpar, uid: uid, nomeCompleto: nomeCompleto,
-    icone: icone, el: el, esvaziar: esvaziar, situacao: situacao, badgeSituacao: badgeSituacao, badgeSemana: badgeSemana, badgeTipo: badgeTipo
+    icone: icone, el: el, esvaziar: esvaziar, situacao: situacao, badgeSituacao: badgeSituacao, badgeSemana: badgeSemana, badgeTipo: badgeTipo,
+    segundaDaSemana: segundaDaSemana, domingoDaSemana: domingoDaSemana, semanaDoCiclo: semanaDoCiclo
   };
 })();

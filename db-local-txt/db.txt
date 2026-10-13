@@ -2,7 +2,7 @@
 #  DB-LOCAL-TXT • ESCALA P5 • COMUNICAÇÃO SOCIAL • 29º BPM
 #  Cada registro tem um bloco legível e uma linha "@registro" (JSON),
 #  que é a parte lida pelo sistema. Não altere a estrutura dessa linha.
-#  Atualizado em: 13/10/2026 14:52   |   Registros: 2   |   Períodos: 2
+#  Atualizado em: 13/10/2026 14:54   |   Registros: 2   |   Períodos: 2
 ########################################################################
 
 ========================================================================
@@ -18,14 +18,14 @@
   ----------------------------------------------------------------------
 
 ========================================================================
-  SEMANA 1  •  19/10/2026 (Segunda-feira) a 23/10/2026 (Sexta-feira)
+  SEMANA 2  •  19/10/2026 (Segunda-feira) a 23/10/2026 (Sexta-feira)
   Efetivo: 1 policial(is)
 ========================================================================
 
   [0002]  1º SGT PM   RG 79284     SUZANO                 Tipo: Expediente
           ID: e-399dff28dea5d01f   |   Criado: 13/10/2026 14:51   |   Atualizado: 13/10/2026 14:52
           Observações: —
-@registro {"id":"e-399dff28dea5d01f","semana":1,"tipo":"expediente","inicio":"2026-10-19","termino":"2026-10-23","grad":"1º SGT PM","rg":"79284","nome":"SUZANO","observacoes":"","criadoEm":1791913885234,"atualizadoEm":1791913920545}
+@registro {"id":"e-399dff28dea5d01f","semana":2,"tipo":"expediente","inicio":"2026-10-19","termino":"2026-10-23","grad":"1º SGT PM","rg":"79284","nome":"SUZANO","observacoes":"","criadoEm":1791913885234,"atualizadoEm":1791913920545}
   ----------------------------------------------------------------------
 
 # FIM DO ARQUIVO

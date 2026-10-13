@@ -606,15 +606,20 @@
     var ini = $('#r-inicio');
     ini.min = hoje;
     $('#r-termino').min = ini.value && ini.value > hoje ? ini.value : hoje;
+    $('#r-termino').max = ini.value ? U.domingoDaSemana(ini.value) : '';
   }
 
   function semanaSelecionada() { return Number($('input[name="semana"]:checked', form).value); }
   function definirSemana(n) { $('input[name="semana"][value="' + n + '"]', form).checked = true; }
 
+  /* Próxima semana do tipo escolhido (1 ou 2) a partir de hoje.
+     Se a semana atual for desse tipo, começa hoje; termina no domingo. */
   function sugerirDatas() {
-    var ini = proximaSegunda(semanaSelecionada() === 2 ? 1 : 0);
+    var hoje = U.hojeISO();
+    var seg = U.segundaDaSemana(hoje);
+    var ini = U.semanaDoCiclo(hoje) === semanaSelecionada() ? hoje : U.somarDias(seg, 7);
     $('#r-inicio').value = ini;
-    $('#r-termino').value = U.somarDias(ini, 6);
+    $('#r-termino').value = U.domingoDaSemana(ini);
     dataAutomatica = true;
     atualizarPeriodo();
   }
@@ -629,7 +634,8 @@
     if (dias < 1) { hint.className = 'hint hint-periodo hint-erro'; hint.appendChild(U.icone('i-alert')); hint.appendChild(document.createTextNode('A Data Término deve ser igual ou posterior à Data Início.')); return; }
     hint.className = 'hint hint-periodo';
     hint.appendChild(U.icone('i-info'));
-    hint.appendChild(document.createTextNode(dias + ' dia(s) • ' + U.diaSemana(ini) + ' a ' + U.diaSemana(fim)));
+    if (fim > U.domingoDaSemana(ini)) { hint.className = 'hint hint-periodo hint-erro'; hint.appendChild(U.icone('i-alert')); hint.appendChild(document.createTextNode('O lançamento deve terminar até domingo, ' + U.br(U.domingoDaSemana(ini)) + '.')); return; }
+    hint.appendChild(document.createTextNode('Semana ' + U.semanaDoCiclo(ini) + ' • ' + dias + ' dia(s) • ' + U.diaSemana(ini) + ' a ' + U.diaSemana(fim)));
   }
 
   function atualizarIconeTipo() {
@@ -713,12 +719,15 @@
 
   /* ---------- Eventos do formulário ---------- */
   $$('input[name="semana"]', form).forEach(function (r) {
-    r.addEventListener('change', function () { if (dataAutomatica && !editandoId) sugerirDatas(); });
+    r.addEventListener('change', function () { sugerirDatas(); });
   });
   $('#r-inicio').addEventListener('change', function () {
     dataAutomatica = false;
     var ini = this.value, fim = $('#r-termino').value;
-    if (ini && (!fim || fim < ini)) $('#r-termino').value = U.somarDias(ini, 6);
+    if (ini) {
+      definirSemana(U.semanaDoCiclo(ini));
+      if (!fim || fim < ini || fim > U.domingoDaSemana(ini)) $('#r-termino').value = U.domingoDaSemana(ini);
+    }
     atualizarPeriodo();
   });
   $('#r-termino').addEventListener('change', function () { dataAutomatica = false; atualizarPeriodo(); });
@@ -764,7 +773,7 @@
   function lerFormulario() {
     return {
       id: editandoId || U.uid('e'),
-      semana: semanaSelecionada(),
+      semana: U.semanaDoCiclo($('#r-inicio').value) || semanaSelecionada(),
       tipo: $('#r-tipo').value,
       inicio: $('#r-inicio').value,
       termino: $('#r-termino').value,
@@ -785,7 +794,7 @@
     if (r.inicio && r.inicio < hoje) marcar($('#r-inicio'), 'A Data Início não pode ser anterior a hoje (' + U.br(hoje) + ').');
     if (r.termino && r.termino < hoje) marcar($('#r-termino'), 'A Data Término não pode ser anterior a hoje (' + U.br(hoje) + ').');
     if (r.inicio && r.termino && r.termino < r.inicio) marcar($('#r-termino'), 'A Data Término deve ser igual ou posterior à Data Início.');
-    if (r.inicio && r.termino && U.diasEntre(r.inicio, r.termino) > 62) marcar($('#r-termino'), 'O período não pode passar de 63 dias.');
+    if (r.inicio && r.termino && r.termino > U.domingoDaSemana(r.inicio)) marcar($('#r-termino'), 'O lançamento deve ficar dentro de uma única semana (até domingo, ' + U.br(U.domingoDaSemana(r.inicio)) + ').');
     if (!r.grad) marcar($('#r-grad'), 'Selecione a graduação.');
     if (!r.rg) marcar($('#r-rg'), 'Informe o RG Militar.');
     else if (r.rg.length < 5 || r.rg.length > 6) marcar($('#r-rg'), 'O RG Militar deve ter de 5 a 6 dígitos.');
