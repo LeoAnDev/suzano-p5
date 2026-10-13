@@ -1187,24 +1187,27 @@
                   <svg class="icon" aria-hidden="true">
                     <use href="#i-database" />
                   </svg>
-                  Abra o sistema pelo servidor local
+                  Confira se a gravação no db.txt está ativa
                 </h3>
                 <p class="texto">
-                  No VS Code, pressione <strong>Ctrl+Shift+B</strong> (ou rode
-                  <code>node servidor.js</code> no terminal) e acesse
-                  <code>http://127.0.0.1:5510/</code>. Assim, cada inclusão,
-                  alteração e exclusão é gravada direto em
-                  <code>db-local-txt/db.txt</code>, sem janelas, com um aviso
-                  de confirmação.
+                  <strong>No GitHub Pages:</strong> o indicador do topo deve
+                  mostrar <strong>GitHub gravando</strong>. Se aparecer
+                  <strong>Conectar GitHub</strong>, clique nele e cole o token
+                  da seção; cada operação vira um commit no
+                  <code>db.txt</code> do repositório.
+                </p>
+                <p class="texto">
+                  <strong>No computador:</strong> no VS Code, o servidor local
+                  liga sozinho (ou pressione <strong>Ctrl+Shift+B</strong>) e o
+                  indicador mostra <strong>db.txt gravando</strong>.
                 </p>
                 <p class="hint">
                   <svg class="icon" aria-hidden="true">
                     <use href="#i-info" />
                   </svg>
-                  O indicador verde <strong>db.txt gravando</strong> no topo
-                  confirma a gravação direta. Se aparecer
-                  <strong>Só no navegador</strong>, o sistema não foi aberto
-                  pelo servidor.
+                  Se o aviso disser <strong>Salvo apenas no navegador</strong>,
+                  nada se perde: o lançamento fica pendente e vai para o
+                  <code>db.txt</code> assim que a gravação for conectada.
                 </p>
               </div>
             </li>
@@ -1222,10 +1225,11 @@
                   <strong>Semana</strong> e o
                   <strong>Tipo de escala</strong> (Expediente, 12, 24 ou 48
                   horas, Feriado, Troca, Sobreaviso, Ponto facultativo ou
-                  Folga). A Data Início é sugerida automaticamente
-                  (a próxima segunda-feira) e os calendários só aceitam datas
-                  de hoje em diante e a Data Término é
-                  preenchida com 7 dias. Depois selecione a
+                  Folga). As datas vão sozinhas para a próxima semana daquele
+                  tipo, até o domingo; os calendários só aceitam datas de hoje
+                  em diante, e ao mudar a Data Início a Semana se ajusta
+                  sozinha (o ciclo alterna Semana 1 e Semana 2, de segunda a
+                  domingo). Depois selecione a
                   <strong>Graduação</strong>, informe o
                   <strong>RG Militar</strong> e o
                   <strong>Nome Farda</strong> (um RG já usado preenche o resto
