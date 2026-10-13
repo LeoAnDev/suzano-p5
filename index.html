@@ -735,7 +735,8 @@
                 </div>
                 <span class="hint"
                   >Digite um RG ou nome já lançado para preencher os demais
-                  campos automaticamente.</span
+                  campos automaticamente, inclusive as qualificações técnicas
+                  do último lançamento do policial.</span
                 >
               </div>
 
@@ -744,7 +745,7 @@
                   <svg class="icon" aria-hidden="true">
                     <use href="#i-message" />
                   </svg>
-                  Observações
+                  Observações / qualificações técnicas
                 </span>
                 <div class="rte" id="editor-obs">
                   <div
@@ -869,7 +870,7 @@
                     role="textbox"
                     aria-multiline="true"
                     aria-labelledby="r-obs-rotulo"
-                    data-placeholder="TROCAS, DISPENSAS, EVENTOS, COBERTURAS…"
+                    data-placeholder="QUALIFICAÇÕES TÉCNICAS (EX.: FOTOGRAFIA, DRONE, CNH D), TROCAS, DISPENSAS…"
                     spellcheck="true"
                   ></div>
                   <span class="rte-contador" data-rte-contador>0 / 5000</span>
@@ -1041,6 +1042,23 @@
                   <select id="f-grad" name="grad" data-graduacoes>
                     <option value="">Todas</option>
                   </select>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="f-qualif">Qualificação / observação</label>
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-search" />
+                  </svg>
+                  <input
+                    id="f-qualif"
+                    name="qualif"
+                    type="search"
+                    data-maiusculas
+                    autocapitalize="characters"
+                    autocomplete="off"
+                    placeholder="EX.: FOTOGRAFIA"
+                  />
                 </div>
               </div>
             </div>
@@ -1300,12 +1318,19 @@
                   <svg class="icon" aria-hidden="true">
                     <use href="#i-message" />
                   </svg>
-                  Formate as observações
+                  Qualificações técnicas e observações
                 </h3>
                 <p class="texto">
-                  O editor aceita <strong>negrito</strong>, <em>itálico</em>,
-                  sublinhado, tachado, listas e citação. Texto colado de outros
-                  programas é limpo automaticamente.
+                  Use as <strong>Observações</strong> para registrar as
+                  <strong>qualificações técnicas</strong> do policial (ex.:
+                  fotografia, drone, CNH D). Ao lançar o mesmo policial em
+                  outra semana, basta digitar o RG ou o Nome Farda: as
+                  qualificações do último lançamento são carregadas sozinhas.
+                  Em <strong>Consultas</strong>, o filtro
+                  <strong>Qualificação / observação</strong> encontra quem tem
+                  cada especialidade, combinado com mês, semana, datas e os
+                  demais filtros. O editor aceita negrito, itálico, sublinhado,
+                  tachado, listas e citação.
                 </p>
               </div>
             </li>

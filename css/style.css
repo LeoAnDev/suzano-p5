@@ -2704,3 +2704,52 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .tabela-por-dia tbody tr:last-child > th {
   border-bottom: none;
 }
+.rte.auto {
+  animation: realce 1.2s var(--ease);
+}
+
+/* Dias de serviço marcados: VERDE (contraste WCAG AA nos dois temas) */
+:root {
+  --servico: #1a7f37;
+  --on-servico: #ffffff;
+  --servico-soft: #dcf5e3;
+  --servico-text: #116329;
+  --servico-sombra: rgba(26, 127, 55, 0.35);
+}
+:root[data-theme="dark"] {
+  --servico: #3fb950;
+  --on-servico: #0b1220;
+  --servico-soft: #133d22;
+  --servico-text: #8ee6a0;
+  --servico-sombra: rgba(63, 185, 80, 0.35);
+}
+.dia-btn.on {
+  background: var(--servico);
+  border-color: var(--servico);
+  color: var(--on-servico);
+  box-shadow: 0 2px 8px var(--servico-sombra);
+}
+.dia-btn.on .dia-sigla {
+  color: var(--on-servico);
+}
+.faixa-dia.on {
+  background: var(--servico);
+  color: var(--on-servico);
+}
+.cob-dia.on {
+  border-color: var(--servico);
+  background: var(--servico-soft);
+  color: var(--servico-text);
+}
+.cob-dia.on strong {
+  color: var(--servico-text);
+}
+/* Texto de exemplo do editor quebra dentro da área (não vaza) */
+.rte-area {
+  position: relative;
+}
+.rte-area.rte-vazio::before {
+  left: 0.85rem;
+  right: 0.85rem;
+  top: 0.7rem;
+}

@@ -37,7 +37,7 @@ A mesma pasta funciona nos dois ambientes sem nenhuma alteração.
 | **Login** | Usuário único da seção (só os hashes PBKDF2 ficam no código), bloqueio após 5 tentativas e opção de mostrar/ocultar a senha |
 | **Painel** | Escala do período vigente no layout original (brasão, faixa da semana, horário) com cartões dos policiais, navegação entre períodos e impressão |
 | **Lançamentos** | **Um único formulário** ao lado da **tabela da escala**. Incluir, editar e excluir com gravação imediata no `db.txt` |
-| **Consultas** | Filtros por data, semana, tipo de escala, policial e graduação. Impressão individual, da consulta ou geral |
+| **Consultas** | Filtros por data, mês, semana do mês, tipo de escala, policial, graduação e **qualificação técnica**. Impressão individual, da consulta ou geral |
 | **Banco db.txt** | Vínculo com o arquivo, situação da gravação, download, importação e pré-visualização do `.txt` |
 | **Modo de usar** | Guia passo a passo dentro do sistema |
 | **Temas** | Claro e escuro, com contraste WCAG 2.1 AA |
@@ -55,7 +55,7 @@ A mesma pasta funciona nos dois ambientes sem nenhuma alteração.
 | **Graduação** | Select | SD PM, CB PM, 3º/2º/1º SGT PM, SUBTEN PM, ASP PM, 2º/1º TEN PM, CAP PM, MAJ PM, TEN CEL PM, CEL PM |
 | **RG Militar** | Numérico | **5 a 6 dígitos**, só números (teclado numérico no celular). Um RG já usado **preenche graduação e nome** |
 | **Nome Farda** | Texto com sugestões | Sempre em **MAIÚSCULAS**. Um nome já usado preenche graduação e RG |
-| **Observações** | Editor de texto rico | Sempre em **MAIÚSCULAS**. Negrito, itálico, sublinhado, tachado, listas, citação, desfazer e refazer |
+| **Observações / qualificações técnicas** | Editor de texto rico | Registra as **qualificações técnicas** do policial (ex.: fotografia, drone, CNH D) e outras observações. Sempre em **MAIÚSCULAS**. Negrito, itálico, sublinhado, tachado, listas, citação, desfazer e refazer |
 
 **Tudo em MAIÚSCULAS.** Os dados são convertidos para maiúsculas durante a digitação, ao colar, ao salvar e ao editar. Se alguém escrever em minúsculas direto no `db.txt`, o sistema normaliza o conteúdo e regrava o arquivo em maiúsculas. As credenciais de login são a exceção: não passam por essa conversão.
 
@@ -81,6 +81,10 @@ Na tabela e nas Consultas, escolha o **mês** e a semana (**Todas, S1, S2…**):
 | `db.txt` | Linha `Dias: SEG 19/10, QUA 21/10…` em cada registro |
 
 O aviso de conflito só aparece se o mesmo policial já estiver escalado **no mesmo dia**.
+
+**Qualificações técnicas reaproveitadas.** Ao lançar um policial que já tem histórico, basta digitar o **RG** ou o **Nome Farda**: graduação, nome e as **observações/qualificações do lançamento mais recente** são carregadas sozinhas, sem sobrescrever o que já foi digitado. Se as qualificações mudarem, edite e salve; a versão nova passa a ser usada nos próximos lançamentos.
+
+**Pesquisa por qualificação.** Em **Consultas**, o filtro **Qualificação / observação** (ex.: `FOTOGRAFIA`) encontra os policiais com aquela especialidade e pode ser combinado com datas, mês, semana, tipo, policial e graduação. A busca da tabela de lançamentos também procura nas observações.
 
 Cada lançamento fica dentro de **uma única semana**. Se alguém gravar um lançamento com a semana incoerente com as datas (por exemplo, editando o `db.txt`), o sistema corrige sozinho.
 

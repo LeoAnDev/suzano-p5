@@ -849,23 +849,37 @@
 
   /* RG ou nome já conhecidos → preenche os demais campos (mínimo de digitação) */
   function realcar(campo) { campo.classList.remove('auto'); void campo.offsetWidth; campo.classList.add('auto'); }
-  function autoPreencher(achado) {
-    if (!achado) return;
+  /* Lançamentos do policial, do mais recente (última atualização) ao mais antigo */
+  function historicoDo(pred) {
+    return P5.db.todos().filter(pred).sort(function (a, b) { return b.atualizadoEm - a.atualizadoEm; });
+  }
+
+  /* Preenche graduação, RG, nome e as QUALIFICAÇÕES TÉCNICAS (observações)
+     a partir do histórico do policial — nunca sobrescreve o que já foi digitado. */
+  function autoPreencher(lista) {
+    if (!lista.length) return;
+    var achado = lista[0];
     [['#r-grad', achado.grad], ['#r-rg', achado.rg], ['#r-nome', achado.nome]].forEach(function (par) {
       var campo = $(par[0]);
       if (!campo.value && par[1]) { campo.value = par[1]; campo.removeAttribute('aria-invalid'); realcar(campo); }
     });
+    var comObs = lista.find(function (r) { return P5.rich.texto(r.observacoes); });
+    if (comObs && !P5.rich.texto(editor.obter())) {
+      editor.definir(comObs.observacoes);
+      realcar($('#editor-obs'));
+      toast('Qualificações de ' + comObs.grad + ' ' + comObs.nome + ' carregadas do lançamento de ' + U.br(comObs.inicio) + '.', 'info');
+    }
   }
   $('#r-rg').addEventListener('input', function () {
     var limpo = this.value.replace(/\D/g, '').slice(0, 6);
     if (limpo !== this.value) this.value = limpo;
     if (limpo.length < 5) return;
-    autoPreencher(P5.db.todos().reverse().find(function (r) { return r.rg === limpo; }));
+    autoPreencher(historicoDo(function (r) { return r.rg === limpo; }));
   });
   $('#r-nome').addEventListener('input', function () {
     var n = U.normalizar(this.value);
     if (!n) return;
-    autoPreencher(P5.db.todos().reverse().find(function (r) { return U.normalizar(r.nome) === n; }));
+    autoPreencher(historicoDo(function (r) { return U.normalizar(r.nome) === n; }));
   });
 
   form.addEventListener('input', function (e) { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); });
@@ -972,7 +986,7 @@
     var lista = todos.filter(function (r) {
       if (mes && r.mes !== mes) return false;
       if (semana && String(r.semana) !== semana) return false;
-      if (busca && U.normalizar(r.grad + ' ' + r.rg + ' ' + r.nome + ' ' + C.tipos[r.tipo].label).indexOf(busca) === -1) return false;
+      if (busca && U.normalizar(r.grad + ' ' + r.rg + ' ' + r.nome + ' ' + C.tipos[r.tipo].label + ' ' + P5.rich.texto(r.observacoes)).indexOf(busca) === -1) return false;
       return true;
     });
     $('#tabela-contagem').textContent = lista.length === todos.length ? String(todos.length) : lista.length + ' de ' + todos.length;
@@ -1038,7 +1052,7 @@
   }
 
   function lerFiltros() {
-    return { de: $('#f-de').value, ate: $('#f-ate').value, mes: $('#f-mes').value, semana: $('#f-semana').value, tipo: $('#f-tipo').value, policial: $('#f-policial').value, grad: $('#f-grad').value };
+    return { de: $('#f-de').value, ate: $('#f-ate').value, mes: $('#f-mes').value, semana: $('#f-semana').value, tipo: $('#f-tipo').value, policial: $('#f-policial').value, grad: $('#f-grad').value, qualif: U.normalizar($('#f-qualif').value) };
   }
 
   function descreverFiltros(f) {
@@ -1050,6 +1064,7 @@
     if (f.tipo) d.push('Tipo: ' + C.tipos[f.tipo].label);
     if (f.policial) d.push('Policial: ' + $('#f-policial').selectedOptions[0].textContent);
     if (f.grad) d.push('Graduação: ' + f.grad);
+    if (f.qualif) d.push('Qualificação: ' + $('#f-qualif').value.trim());
     return d;
   }
 
@@ -1061,6 +1076,7 @@
       if (f.tipo && r.tipo !== f.tipo) return false;
       if (f.policial && U.normalizar(r.nome) !== f.policial) return false;
       if (f.grad && r.grad !== f.grad) return false;
+      if (f.qualif && U.normalizar(P5.rich.texto(r.observacoes)).indexOf(f.qualif) === -1) return false;
       return true;
     });
   }
