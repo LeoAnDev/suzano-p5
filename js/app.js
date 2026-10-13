@@ -410,7 +410,7 @@
     if (r.gravouArquivo) toast(acao + (r.modo === 'github' ? ' e gravado no db.txt do repositório (commit no GitHub).' : ' e gravado no db.txt.'), 'sucesso');
     else toast(acao + '. ' + (r.falha || (P5.db.estado().podeGithub
       ? 'Salvo apenas no navegador. Conecte ao GitHub (indicador no topo) para gravar no db.txt do repositório.'
-      : AVISO_SEM_ARQUIVO)), 'aviso');
+      : AVISO_SEM_ARQUIVO)), r.falha ? 'erro' : 'aviso');
   }
 
   /* =================================================================

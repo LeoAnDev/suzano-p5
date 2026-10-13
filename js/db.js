@@ -275,7 +275,7 @@ P5.db = (function () {
 
   function erroGithub(status) {
     if (status === 401) return 'Token do GitHub inválido ou expirado.';
-    if (status === 403) return 'O token não tem permissão de escrita (Contents: Read and write) neste repositório.';
+    if (status === 403) return 'O GitHub recusou a gravação: o token só tem permissão de leitura. No GitHub, edite o token → Repositories → Contents → "Read and write" e clique em Update.';
     if (status === 404) return 'O token não tem acesso ao repositório ' + GH.dono + '/' + GH.repo + '.';
     return 'GitHub respondeu com erro ' + status + '.';
   }
@@ -307,12 +307,20 @@ P5.db = (function () {
     var locais = registros;
     registros = lido.registros;
     ultimosErros = lido.erros;
+    var gravou = true;
     if (pendente()) {
       var pend = locais;
-      await operar(function (lista) { return mesclarEm(lista, pend).lista; }, 'sincroniza lançamentos pendentes do navegador');
+      gravou = await operar(function (lista) { return mesclarEm(lista, pend).lista; }, 'sincroniza lançamentos pendentes do navegador');
     } else if (lido.normalizados) {
-      await operar(function (lista) { return lista; }, 'normaliza o db.txt (maiúsculas)');
+      gravou = await operar(function (lista) { return lista; }, 'normaliza o db.txt (maiúsculas)');
     } else cache(serializar(registros));
+    if (!gravou) {
+      // o token lê, mas o GitHub recusou a gravação: não finge que conectou
+      var motivo = ultimaFalha.replace(' A alteração ficou salva no navegador.', '');
+      registros = mesclarEm(registros, locais).lista;
+      desconectarGithub();
+      throw new Error(motivo);
+    }
     emitir('github');
     return true;
   }
