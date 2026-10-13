@@ -1237,6 +1237,16 @@
                   <strong>Observações</strong>. Clique em
                   <strong>Incluir</strong>.
                 </p>
+                <p class="hint">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-info" />
+                  </svg>
+                  Regras: tudo é gravado em <strong>MAIÚSCULAS</strong>; o RG
+                  Militar tem <strong>5 a 6 dígitos</strong>; cada lançamento
+                  fica dentro de <strong>uma única semana</strong> (segunda a
+                  domingo). Depois de incluir, semana, datas e tipo continuam
+                  preenchidos para lançar o próximo policial.
+                </p>
               </div>
             </li>
             <li class="card passo">
@@ -1269,7 +1279,18 @@
                   <strong>Editar</strong> para carregar o lançamento no
                   formulário e <strong>Salvar alterações</strong>, ou
                   <strong>Excluir</strong> para remover. O <code>db.txt</code> é
-                  atualizado no mesmo instante.
+                  atualizado no mesmo instante; no GitHub Pages, cada operação
+                  vira um commit no repositório, com o que foi feito, por quem
+                  e quando.
+                </p>
+                <p class="hint">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-lock" />
+                  </svg>
+                  Lançamentos cujo período já começou aparecem com
+                  <strong>cadeado</strong>: não podem ser editados nem
+                  excluídos, para preservar o histórico da escala. Eles
+                  continuam visíveis e podem ser impressos.
                 </p>
               </div>
             </li>
@@ -1287,8 +1308,10 @@
                   de escala, policial ou graduação. Imprima um lançamento, a
                   consulta ou o <strong>Relatório geral</strong>. Na janela de
                   impressão, escolha <strong>Salvar como PDF</strong> e papel
-                  <strong>A4</strong>, e desmarque
-                  <strong>Cabeçalhos e rodapés</strong>.
+                  <strong>A4</strong>, desmarque
+                  <strong>Cabeçalhos e rodapés</strong> e marque
+                  <strong>Gráficos de plano de fundo</strong>. O rodapé de cada
+                  página registra quem gerou o documento, a data e a hora.
                 </p>
               </div>
             </li>
@@ -1302,9 +1325,10 @@
                   Saia do sistema
                 </h3>
                 <p class="texto">
-                  Clique em <strong>Sair</strong> ao terminar. A sessão e os
-                  tokens do navegador são eliminados. Depois de 30 minutos sem
-                  uso, a sessão expira sozinha.
+                  Clique em <strong>Sair</strong> ao terminar. A sessão, os
+                  tokens do navegador e o token do GitHub da aba são
+                  eliminados. A sessão também expira sozinha após 30 minutos
+                  sem uso ou 8 horas no total.
                 </p>
               </div>
             </li>
