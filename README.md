@@ -198,6 +198,14 @@ No GitHub Pages, o sistema grava no `db.txt` do repositório pela **API oficial 
 4. **Permissions → Repository permissions → Contents:** *Read and write*. Não marque mais nada.
 5. Clique em **Generate token** e copie o valor (começa com `github_pat_`).
 
+**Testar o token antes (recomendado):** confere de verdade se o token lê e grava no repositório, sem alterar nada:
+
+```bash
+node gerar-credenciais.js --testar
+```
+
+O resultado esperado é `✔ Leitura do repositório: OK` e `✔ Escrita no repositório: OK`. Se algo faltar, o script diz exatamente o que mudar no token.
+
 **Ativar a gravação automática (uma vez):** com o token copiado, rode na pasta do projeto:
 
 ```bash

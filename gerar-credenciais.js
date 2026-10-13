@@ -69,14 +69,46 @@ function perguntar(rl, texto, oculto) {
 }
 
 /* Confere se o token enxerga o repositório e pode ler o db.txt */
+/* Confere LEITURA e ESCRITA de verdade.
+   A escrita é testada criando e apagando na hora uma branch temporária
+   (exige a mesma permissão "Contents: Read and write"), sem tocar no
+   db.txt e sem criar commits. */
 async function verificarToken(token) {
-  if (typeof fetch !== 'function') return 'não verificado (Node.js antigo)';
-  const h = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'User-Agent': 'escala-p5' };
-  const r = await fetch('https://api.github.com/repos/' + DONO + '/' + REPO + '/contents/db-local-txt/db.txt?ref=main', { headers: h });
-  if (r.status === 401) throw new Error('Token inválido ou expirado.');
-  if (r.status === 404) throw new Error('O token não tem acesso ao repositório ' + DONO + '/' + REPO + ' (em "Repository access", escolha suzano-p5).');
-  if (!r.ok) throw new Error('GitHub respondeu ' + r.status + '.');
-  return 'acesso ao repositório confirmado';
+  if (typeof fetch !== 'function') throw new Error('Node.js muito antigo: instale a versão LTS em https://nodejs.org');
+  const base = 'https://api.github.com/repos/' + DONO + '/' + REPO;
+  const h = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'User-Agent': 'escala-p5', 'X-GitHub-Api-Version': '2022-11-28' };
+
+  const r = await fetch(base + '/git/ref/heads/main', { headers: h });
+  if (r.status === 401) throw new Error('Token inválido ou expirado. Gere outro no GitHub.');
+  if (r.status === 404 || r.status === 403) throw new Error('O token NÃO tem acesso ao repositório ' + DONO + '/' + REPO + '. No GitHub, edite o token → Repository access → "Only select repositories" → escolha suzano-p5 → Update.');
+  if (!r.ok) throw new Error('GitHub respondeu ' + r.status + ' na leitura.');
+  console.log('    ✔ Leitura do repositório: OK');
+  const sha = (await r.json()).object.sha;
+
+  const ref = 'refs/heads/p5-teste-permissao-' + crypto.randomBytes(4).toString('hex');
+  const w = await fetch(base + '/git/refs', { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, h), body: JSON.stringify({ ref: ref, sha: sha }) });
+  if (w.status === 403 || w.status === 404) throw new Error('O token só LÊ o repositório, não GRAVA. No GitHub, edite o token → Permissions → Repositories → Contents → "Read and write" → Update.');
+  if (!w.ok) throw new Error('GitHub respondeu ' + w.status + ' no teste de escrita.');
+  await fetch(base + '/' + ref.replace('refs/', 'git/refs/'), { method: 'DELETE', headers: h });
+  console.log('    ✔ Escrita no repositório: OK');
+  return 'token pronto para gravar no db.txt';
+}
+
+/* node gerar-credenciais.js --testar  → só testa o token, não altera nada */
+async function testarApenas() {
+  console.log('\n  ESCALA P5 • testar token do GitHub\n');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: !!process.stdin.isTTY });
+  try {
+    const token = (await perguntar(rl, '  Cole o token (não aparece na tela): ', true)).trim();
+    if (!/^github_pat_[A-Za-z0-9_]{20,}$/.test(token)) throw new Error('Isso não parece um token fine-grained (começa com "github_pat_").');
+    console.log('\n  Testando…');
+    console.log('\n  RESULTADO: ' + await verificarToken(token) + '.\n');
+  } catch (e) {
+    console.error('\n  ✘ ' + e.message + '\n');
+    process.exitCode = 1;
+  } finally {
+    rl.close();
+  }
 }
 
 function gravar(usuario, senha, token) {
@@ -119,7 +151,8 @@ async function principal() {
     const token = (await perguntar(rl, '  Token: ', true)).trim();
     if (token) {
       if (!/^github_pat_[A-Za-z0-9_]{20,}$/.test(token)) throw new Error('Isso não parece um token fine-grained (começa com "github_pat_").');
-      console.log('  Verificando token… ' + await verificarToken(token));
+      console.log('  Verificando token…');
+      console.log('  ' + await verificarToken(token));
     }
 
     gravar(usuario, senha, token);
@@ -137,5 +170,5 @@ async function principal() {
   }
 }
 
-if (require.main === module) principal();
-module.exports = { gravar, cifrarToken, hash };
+if (require.main === module) (process.argv.includes('--testar') ? testarApenas : principal)();
+module.exports = { gravar, cifrarToken, hash, verificarToken };
