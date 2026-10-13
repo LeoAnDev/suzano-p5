@@ -2418,3 +2418,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   text-align: left;
   margin-bottom: 1rem;
 }
+
+/* Modo de usar: dicas como texto corrido (não colunas) e nada vaza do card */
+.passo > div {
+  min-width: 0;
+}
+.passo .texto,
+.passo .hint {
+  overflow-wrap: anywhere;
+}
+.passo .hint {
+  display: block;
+  line-height: 1.55;
+  margin-top: 0.4rem;
+}
+.passo .hint > .icon {
+  margin: 0 0.35rem 0 0;
+  vertical-align: -0.18em;
+}
+.passo code {
+  white-space: nowrap;
+}
