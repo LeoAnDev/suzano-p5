@@ -29,7 +29,7 @@ Feito em **HTML, CSS e JavaScript puros**: sem frameworks, sem bibliotecas exter
 
 | Área | O que faz |
 | --- | --- |
-| **Login** | Usuário único da seção (hard code, guardado como hash SHA-256), bloqueio após 5 tentativas e opção de mostrar/ocultar a senha |
+| **Login** | Usuário único da seção (só os hashes PBKDF2 ficam no código), bloqueio após 5 tentativas e opção de mostrar/ocultar a senha |
 | **Painel** | Escala do período vigente no layout original (brasão, faixa da semana, horário) com cartões dos policiais, navegação entre períodos e impressão |
 | **Lançamentos** | **Um único formulário** ao lado da **tabela da escala**. Incluir, editar e excluir com gravação imediata no `db.txt` |
 | **Consultas** | Filtros por data, semana, tipo de escala, policial e graduação. Impressão individual, da consulta ou geral |
@@ -51,7 +51,7 @@ Feito em **HTML, CSS e JavaScript puros**: sem frameworks, sem bibliotecas exter
 | **Nome Farda** | Texto com sugestões | Sempre em **MAIÚSCULAS**. Um nome já usado preenche graduação e RG |
 | **Observações** | Editor de texto rico | Sempre em **MAIÚSCULAS**. Negrito, itálico, sublinhado, tachado, listas, citação, desfazer e refazer |
 
-**Tudo em MAIÚSCULAS.** Os dados são convertidos para maiúsculas durante a digitação, ao colar, ao salvar e ao editar. Se alguém escrever em minúsculas direto no `db.txt`, o sistema normaliza o conteúdo e regrava o arquivo em maiúsculas. O login é a exceção: o usuário `p5/admin` continua em minúsculas.
+**Tudo em MAIÚSCULAS.** Os dados são convertidos para maiúsculas durante a digitação, ao colar, ao salvar e ao editar. Se alguém escrever em minúsculas direto no `db.txt`, o sistema normaliza o conteúdo e regrava o arquivo em maiúsculas. As credenciais de login são a exceção: não passam por essa conversão.
 
 Para digitar o mínimo:
 
@@ -67,6 +67,7 @@ suzano-p5/
 ├── index.html              # Somente HTML: telas, formulário, sprite de ícones e importações
 ├── README.md
 ├── servidor.js             # Servidor local (Node.js puro): entrega o site e grava o db.txt
+├── gerar-credenciais.js    # Define usuário e senha (grava só hashes em js/config.js)
 ├── .vscode/
 │   ├── tasks.json          # Ctrl+Shift+B inicia o servidor local
 │   └── settings.json       # Live Server ignora db-local-txt/ (caso seja usado)
@@ -74,7 +75,7 @@ suzano-p5/
 │   └── style.css           # Todo o CSS: temas, layout, animações, responsivo e impressão A4
 ├── js/
 │   ├── theme.js            # Tema claro/escuro (carregado no <head>, sem "piscar")
-│   ├── config.js           # Credenciais (hash), graduações, tipos de escala, horário
+│   ├── config.js           # Hashes das credenciais, graduações, tipos de escala, horário
 │   ├── utils.js            # Datas, texto, badges e criação segura de elementos
 │   ├── editor.js           # Editor de texto rico + sanitizador por lista branca
 │   ├── auth.js             # Login, sessão, inatividade e logout
@@ -119,18 +120,33 @@ O servidor só aceita conexões do próprio computador (`127.0.0.1`), só grava 
 
 ## Acesso ao sistema
 
-| Campo | Valor |
-| --- | --- |
-| Usuário | `p5/admin` |
-| Senha | `p5admin29bpm` |
+O sistema tem **um único usuário** para toda a seção. **Usuário e senha não são publicados em nenhum arquivo** do projeto, nem nesta documentação: eles são repassados pelo responsável da seção, pessoalmente.
 
-É um usuário único para toda a seção. O código guarda apenas o **hash SHA-256 com salt**, nunca a senha em texto puro.
+O código guarda apenas **hashes PBKDF2-SHA-256** (310 mil iterações, com salt aleatório), o que torna inviável descobrir a senha a partir do código público, desde que ela seja forte.
+
+### Definir ou trocar usuário e senha
+
+No terminal, na pasta do projeto:
+
+```bash
+node gerar-credenciais.js
+```
+
+O script pergunta o usuário e a senha (que não aparece na tela), exige uma senha forte (12 ou mais caracteres, com maiúsculas, minúsculas, números e símbolos) e grava só os hashes em `js/config.js`. Para ele criar uma senha aleatória forte:
+
+```bash
+node gerar-credenciais.js --gerar
+```
+
+Depois, faça commit e push para valer também no GitHub Pages.
+
+> **Nunca** escreva usuário ou senha em README, issues, commits ou mensagens. Se a senha vazar, gere outra na hora com o script.
 
 ---
 
 ## Modo de usar
 
-1. **Entre** com o usuário e a senha.
+1. **Entre** com o usuário e a senha da seção.
 2. Em **Lançamentos**, escolha a **Semana** e o **Tipo de escala**, e confira as datas sugeridas.
 3. Selecione a **Graduação** e informe o **RG Militar** e o **Nome Farda**. Escreva as **Observações**, se houver.
 4. Clique em **Incluir**. O lançamento é gravado **na hora** no `db.txt`, sem janela nenhuma, e um aviso (toast) confirma a gravação.
@@ -268,7 +284,7 @@ A barra de endereços mostra **somente o endereço base**, sem `#`, sem `index.h
 
 ## Segurança
 
-- **Credenciais em hash** SHA-256 com salt, comparadas em tempo constante.
+- **Credenciais em hash PBKDF2-SHA-256** (310 mil iterações, salt aleatório), comparadas em tempo constante. Usuário e senha não aparecem em nenhum arquivo nem na documentação.
 - **Bloqueio por tentativas:** 5 erros bloqueiam o acesso por 60 segundos.
 - **Sessão em `sessionStorage`**, com token aleatório de 256 bits, que morre ao fechar a aba.
 - **Expiração** após 30 minutos sem uso ou 8 horas no máximo.
@@ -328,11 +344,7 @@ Tudo fica em [`js/config.js`](js/config.js):
 
 ### Trocar usuário ou senha
 
-Gere os novos hashes (o salt é `p5-29bpm::`) e substitua `userHash` e `passHash` em `js/config.js`:
-
-```bash
-node -e "const c=require('crypto');const h=s=>c.createHash('sha256').update('p5-29bpm::'+s).digest('hex');console.log('user:',h('NOVO_USUARIO'));console.log('pass:',h('NOVA_SENHA'))"
-```
+Veja [Definir ou trocar usuário e senha](#definir-ou-trocar-usuário-e-senha).
 
 ---
 

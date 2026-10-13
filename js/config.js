@@ -10,13 +10,15 @@ P5.config = Object.freeze({
   unidade: '29º BPM',
   secao: 'P5 • Comunicação Social',
 
-  /* Usuário único da seção (hard code).
-     Credenciais guardadas apenas como hash SHA-256 com salt —
-     nunca em texto puro no código-fonte. */
+  /* Usuário único da seção.
+     Somente hashes PBKDF2-SHA-256 (310 mil iterações, salt aleatório):
+     usuário e senha nunca aparecem no código nem na documentação.
+     Para definir/trocar: node gerar-credenciais.js */
   auth: Object.freeze({
-    salt: 'p5-29bpm::',
-    userHash: '25926c393dc1906aa2b872a364f620a37b315a7cdf81cb7ab2c0a22ac38e7b82',
-    passHash: 'ea2f8a3728f6b400bbcb8f31ec33d8466566f72070552c2ab5bc516405f68f5b'
+    salt: 'be572a36a99aeadb3c7b47d24c38cfbe',
+    iteracoes: 310000,
+    userHash: '949f4129c220f28aa9e04287a1b2992d45a1a77c206acdfeb2729ca3d3eb7d9f',
+    passHash: '8ce7dbf73a7538099a0f3be68dd73c2cd6dd5a8fed7248d0766f8319ffcae80f'
   }),
 
   /* Sessão */

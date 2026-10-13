@@ -9,10 +9,29 @@ P5.auth = (function () {
   var ultimoToque = 0;
   var aoExpirar = null;
 
-  async function sha256(texto) {
-    var dados = new TextEncoder().encode(texto);
-    var buf = await crypto.subtle.digest("SHA-256", dados);
-    return Array.from(new Uint8Array(buf))
+  /* PBKDF2-SHA-256 com salt aleatório e muitas iterações (padrão OWASP):
+     torna inviável descobrir a senha por força bruta a partir do hash
+     público no código-fonte. */
+  function hexParaBytes(hex) {
+    var b = new Uint8Array(hex.length / 2);
+    for (var i = 0; i < b.length; i++) b[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return b;
+  }
+
+  async function pbkdf2(texto) {
+    var chave = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(texto),
+      "PBKDF2",
+      false,
+      ["deriveBits"],
+    );
+    var bits = await crypto.subtle.deriveBits(
+      { name: "PBKDF2", hash: "SHA-256", salt: hexParaBytes(C.auth.salt), iterations: C.auth.iteracoes },
+      chave,
+      256,
+    );
+    return Array.from(new Uint8Array(bits))
       .map(function (b) {
         return b.toString(16).padStart(2, "0");
       })
@@ -80,8 +99,8 @@ P5.auth = (function () {
       };
     }
 
-    var hU = await sha256(C.auth.salt + String(usuario).trim());
-    var hS = await sha256(C.auth.salt + String(senha));
+    var hU = await pbkdf2("usuario:" + String(usuario).trim());
+    var hS = await pbkdf2("senha:" + String(senha));
     var valido = iguais(hU, C.auth.userHash) & iguais(hS, C.auth.passHash);
 
     if (!valido) {
