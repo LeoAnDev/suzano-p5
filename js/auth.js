@@ -137,7 +137,36 @@ P5.auth = (function () {
       ultimaAtividade: agora,
     };
     sessionStorage.setItem(C.sessionKey, JSON.stringify(sessao));
+    await liberarTokenGithub(String(senha));
     return { ok: true, sessao: sessao };
+  }
+
+  /* Token do GitHub guardado CIFRADO no código (AES-256-GCM, chave PBKDF2
+     derivada da senha). Só é aberto com a senha correta e fica apenas na
+     sessão da aba — assim o Pages grava no db.txt sem colar token. */
+  function base64ParaBytes(b64) {
+    var bin = atob(b64), b = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
+    return b;
+  }
+
+  async function liberarTokenGithub(senha) {
+    var cif = C.auth.tokenCifrado;
+    if (!cif || !C.github) return;
+    try {
+      var base = await crypto.subtle.importKey("raw", new TextEncoder().encode("chave:" + senha), "PBKDF2", false, ["deriveKey"]);
+      var chave = await crypto.subtle.deriveKey(
+        { name: "PBKDF2", hash: "SHA-256", salt: hexParaBytes(cif.salt), iterations: C.auth.iteracoes },
+        base,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["decrypt"],
+      );
+      var claro = await crypto.subtle.decrypt({ name: "AES-GCM", iv: hexParaBytes(cif.iv) }, chave, base64ParaBytes(cif.dados));
+      sessionStorage.setItem(C.github.tokenKey, new TextDecoder().decode(claro));
+    } catch (e) {
+      console.warn("Não foi possível abrir o token do GitHub cifrado.", e);
+    }
   }
 
   /* ---------- Sessão ---------- */

@@ -132,7 +132,7 @@ No terminal, na pasta do projeto:
 node gerar-credenciais.js
 ```
 
-O script pergunta o usuário e a senha (que não aparece na tela), exige uma senha forte (12 ou mais caracteres, com maiúsculas, minúsculas, números e símbolos) e grava só os hashes em `js/config.js`. Para ele criar uma senha aleatória forte:
+O script pergunta o usuário, a senha (que não aparece na tela) e o token do GitHub (opcional, para gravar pelo Pages). Ele exige uma senha forte (12 ou mais caracteres, com maiúsculas, minúsculas, números e símbolos) e grava em `js/config.js` só os hashes e o token cifrado. Para ele criar uma senha aleatória forte:
 
 ```bash
 node gerar-credenciais.js --gerar
@@ -198,11 +198,22 @@ No GitHub Pages, o sistema grava no `db.txt` do repositório pela **API oficial 
 4. **Permissions → Repository permissions → Contents:** *Read and write*. Não marque mais nada.
 5. Clique em **Generate token** e copie o valor (começa com `github_pat_`).
 
-**Como usar:** na primeira gravação, ou ao clicar no indicador **Conectar GitHub** no topo, o sistema abre a janela **Conectar ao GitHub**. Cole o token e confirme.
+**Ativar a gravação automática (uma vez):** com o token copiado, rode na pasta do projeto:
+
+```bash
+node gerar-credenciais.js
+```
+
+Informe o usuário, a senha e, quando pedir, o token. O script confere se o token tem acesso ao repositório e grava em `js/config.js` **só o token cifrado** (AES-256-GCM, chave derivada da senha por PBKDF2 com 310 mil iterações). Depois, faça commit e push.
+
+A partir daí, **quem entra no sistema no Pages com usuário e senha já fica conectado ao GitHub**, sem colar token nenhum. Cada inclusão, alteração ou exclusão vai direto para o `db.txt` do repositório. Sem a senha, o token cifrado publicado não serve para nada.
+
+Se o token não estiver configurado ou expirar, o indicador **Conectar GitHub** no topo abre a janela para colar um token manualmente, que vale só para aquela sessão.
 
 | Cuidado | Por quê |
 | --- | --- |
-| O token **nunca** vai para o código, o README, issues ou commits | Quem tiver o token consegue alterar o `db.txt` |
+| O token em texto puro **nunca** vai para o código, o README, issues ou commits; só a versão cifrada fica no `config.js` | Quem tiver o token consegue alterar o `db.txt` |
+| O token expira (ex.: 90 dias) | Gere outro e rode `node gerar-credenciais.js` de novo |
 | Ele fica só na aba aberta (`sessionStorage`) e é apagado ao clicar em **Sair** | Fechar a aba também apaga |
 | Em caso de vazamento, revogue em **GitHub → Settings → Developer settings → Personal access tokens** | Gere outro em seguida |
 | O `db.txt` do repositório público é **legível por qualquer pessoa** | A escrita é protegida, a leitura não |

@@ -1,15 +1,18 @@
 /* =====================================================================
-   ESCALA P5 • 29º BPM — Definir usuário e senha de acesso
+   ESCALA P5 • 29º BPM — Configuração de acesso (rodar UMA vez)
 
    Uso (no terminal, na pasta do projeto):
-     node gerar-credenciais.js            → pergunta usuário e senha
+     node gerar-credenciais.js            → pergunta usuário, senha e token
      node gerar-credenciais.js --gerar    → cria uma senha forte aleatória
 
-   O script grava em js/config.js APENAS:
-     • um salt aleatório,
-     • o número de iterações,
-     • os hashes PBKDF2-SHA-256 do usuário e da senha.
-   Usuário e senha NUNCA são gravados em nenhum arquivo.
+   O que é gravado em js/config.js (o arquivo é público no GitHub):
+     • hashes PBKDF2-SHA-256 do usuário e da senha (310 mil iterações);
+     • o token do GitHub CIFRADO com AES-256-GCM, com chave derivada da
+       senha. Sem a senha, o token cifrado é inútil.
+   Usuário, senha e token NUNCA são gravados em texto puro.
+
+   Com o token configurado, quem entra no sistema publicado no GitHub
+   Pages já grava no db.txt do repositório — sem colar token nenhum.
    ===================================================================== */
 'use strict';
 
@@ -20,9 +23,21 @@ const readline = require('readline');
 
 const CONFIG = path.join(__dirname, 'js', 'config.js');
 const ITERACOES = 310000; // recomendação OWASP para PBKDF2-SHA-256
+const DONO = 'LeoAnDev';
+const REPO = 'suzano-p5';
 
 function hash(texto, saltHex) {
   return crypto.pbkdf2Sync(texto, Buffer.from(saltHex, 'hex'), ITERACOES, 32, 'sha256').toString('hex');
+}
+
+/* AES-256-GCM no formato do WebCrypto: dados = cifrado + tag (16 bytes) */
+function cifrarToken(token, senha) {
+  const salt = crypto.randomBytes(16);
+  const iv = crypto.randomBytes(12);
+  const chave = crypto.pbkdf2Sync('chave:' + senha, salt, ITERACOES, 32, 'sha256');
+  const c = crypto.createCipheriv('aes-256-gcm', chave, iv);
+  const dados = Buffer.concat([c.update(token, 'utf8'), c.final(), c.getAuthTag()]);
+  return { salt: salt.toString('hex'), iv: iv.toString('hex'), dados: dados.toString('base64') };
 }
 
 function senhaForte() {
@@ -46,30 +61,43 @@ function avaliar(senha) {
 
 function perguntar(rl, texto, oculto) {
   return new Promise((resolve) => {
-    if (!oculto) { rl.question(texto, (r) => resolve(r)); return; }
+    if (!oculto || !process.stdin.isTTY) { rl.question(texto, (r) => resolve(r)); return; }
     const escrever = rl._writeToOutput;
     rl._writeToOutput = (s) => { if (s.includes(texto)) escrever.call(rl, s); else escrever.call(rl, '*'); };
     rl.question(texto, (r) => { rl._writeToOutput = escrever; process.stdout.write('\n'); resolve(r); });
   });
 }
 
-function gravar(usuario, senha) {
+/* Confere se o token enxerga o repositório e pode ler o db.txt */
+async function verificarToken(token) {
+  if (typeof fetch !== 'function') return 'não verificado (Node.js antigo)';
+  const h = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'User-Agent': 'escala-p5' };
+  const r = await fetch('https://api.github.com/repos/' + DONO + '/' + REPO + '/contents/db-local-txt/db.txt?ref=main', { headers: h });
+  if (r.status === 401) throw new Error('Token inválido ou expirado.');
+  if (r.status === 404) throw new Error('O token não tem acesso ao repositório ' + DONO + '/' + REPO + ' (em "Repository access", escolha suzano-p5).');
+  if (!r.ok) throw new Error('GitHub respondeu ' + r.status + '.');
+  return 'acesso ao repositório confirmado';
+}
+
+function gravar(usuario, senha, token) {
   const salt = crypto.randomBytes(16).toString('hex');
+  const cif = token ? cifrarToken(token, senha) : null;
   const bloco =
     '  auth: Object.freeze({\n' +
     "    salt: '" + salt + "',\n" +
     '    iteracoes: ' + ITERACOES + ',\n' +
     "    userHash: '" + hash('usuario:' + usuario, salt) + "',\n" +
-    "    passHash: '" + hash('senha:' + senha, salt) + "'\n" +
+    "    passHash: '" + hash('senha:' + senha, salt) + "',\n" +
+    '    tokenCifrado: ' + (cif ? "{ salt: '" + cif.salt + "', iv: '" + cif.iv + "', dados: '" + cif.dados + "' }" : 'null') + '\n' +
     '  }),';
   const conteudo = fs.readFileSync(CONFIG, 'utf8');
-  const novo = conteudo.replace(/  auth: Object\.freeze\(\{[\s\S]*?\}\),/, bloco);
+  const novo = conteudo.replace(/  auth: Object\.freeze\(\{[\s\S]*?\n  \}\),/, bloco);
   if (novo === conteudo) throw new Error('Bloco "auth" não encontrado em js/config.js.');
   fs.writeFileSync(CONFIG, novo, 'utf8');
 }
 
-(async () => {
-  console.log('\n  ESCALA P5 • definir credenciais de acesso\n');
+async function principal() {
+  console.log('\n  ESCALA P5 • configurar acesso\n');
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: !!process.stdin.isTTY });
   try {
     const usuario = (await perguntar(rl, '  Usuário: ')).trim();
@@ -79,24 +107,35 @@ function gravar(usuario, senha) {
     if (process.argv.includes('--gerar')) {
       senha = senhaForte();
     } else {
-      senha = await perguntar(rl, '  Nova senha: ', true);
+      senha = await perguntar(rl, '  Senha: ', true);
       const erros = avaliar(senha);
       if (erros.length) throw new Error('A senha deve ' + erros.join(', ') + '.');
       const conf = await perguntar(rl, '  Repita a senha: ', true);
       if (conf !== senha) throw new Error('As senhas não conferem.');
     }
 
-    gravar(usuario, senha);
-    console.log('\n  Credenciais atualizadas em js/config.js (somente hashes).');
+    console.log('\n  Token do GitHub (github_pat_…) para gravar no db.txt pelo Pages.');
+    console.log('  Deixe em branco para não usar gravação pelo Pages.');
+    const token = (await perguntar(rl, '  Token: ', true)).trim();
+    if (token) {
+      if (!/^github_pat_[A-Za-z0-9_]{20,}$/.test(token)) throw new Error('Isso não parece um token fine-grained (começa com "github_pat_").');
+      console.log('  Verificando token… ' + await verificarToken(token));
+    }
+
+    gravar(usuario, senha, token);
+    console.log('\n  Pronto! js/config.js atualizado (somente hashes e token cifrado).');
     if (process.argv.includes('--gerar')) {
       console.log('\n  SENHA GERADA (anote em local seguro — ela não será exibida de novo):');
       console.log('\n      ' + senha + '\n');
     }
-    console.log('  Faça commit e push para valer também no GitHub Pages.\n');
+    console.log('  Agora faça commit e push:  git add js/config.js && git commit -m "Atualiza acesso" && git push\n');
   } catch (e) {
     console.error('\n  Erro: ' + e.message + '\n');
     process.exitCode = 1;
   } finally {
     rl.close();
   }
-})();
+}
+
+if (require.main === module) principal();
+module.exports = { gravar, cifrarToken, hash };
