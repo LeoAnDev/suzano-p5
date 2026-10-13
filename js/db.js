@@ -82,15 +82,34 @@ P5.db = (function () {
   /* ---------- Sanitização (o .txt é tratado como não confiável) ---------- */
   var RE_ID = /^[a-z]+-[0-9a-f]{16}$/;
 
+  /* Dias trabalhados: datas válidas, sem repetição, todas na mesma semana.
+     Sem a lista (registros antigos), vale todo o período início–término. */
+  function sanitizarDias(r) {
+    var dias = Array.isArray(r.dias) ? r.dias.filter(function (d) { return U.deISO(d); }) : [];
+    dias = dias.filter(function (d, i) { return dias.indexOf(d) === i; }).sort();
+    if (dias.length) {
+      var seg = U.segundaDaSemana(dias[0]);
+      dias = dias.filter(function (d) { return U.segundaDaSemana(d) === seg; });
+    } else if (U.deISO(r.inicio)) {
+      var fim = U.deISO(r.termino) && r.termino >= r.inicio ? r.termino : r.inicio;
+      if (fim > U.domingoDaSemana(r.inicio)) fim = U.domingoDaSemana(r.inicio);
+      dias = U.diasDoIntervalo(r.inicio, fim);
+    }
+    return dias;
+  }
+
   function sanitizar(r) {
     if (!r || typeof r !== 'object') return null;
+    var dias = sanitizarDias(r);
+    var inicio = dias[0] || '', termino = dias[dias.length - 1] || '';
     var rec = {
       id: RE_ID.test(r.id || '') ? r.id : U.uid('e'),
-      semana: U.semanaDoMes(r.inicio),   // S1, S2… dentro do mês (calculada pela data)
-      mes: U.mesDe(r.inicio),            // 'AAAA-MM'
+      semana: U.semanaDoMes(inicio),     // S1, S2… dentro do mês (calculada pela data)
+      mes: U.mesDe(inicio),              // 'AAAA-MM'
       tipo: C.tipos[r.tipo] ? r.tipo : 'expediente',
-      inicio: U.deISO(r.inicio) ? r.inicio : '',
-      termino: U.deISO(r.termino) ? r.termino : '',
+      inicio: inicio,                    // primeiro dia trabalhado
+      termino: termino,                  // último dia trabalhado
+      dias: dias,                        // dias trabalhados na semana
       grad: C.graduacoes.indexOf(r.grad) !== -1 ? r.grad : '',
       rg: String(r.rg == null ? '' : r.rg).replace(/\D/g, '').slice(0, 6),
       nome: U.limpar(r.nome, 60).toLocaleUpperCase('pt-BR'),
@@ -129,9 +148,12 @@ P5.db = (function () {
   function agrupar(lista) {
     var grupos = [], mapa = {};
     lista.slice().sort(comparar).forEach(function (r) {
-      var k = r.mes + '|' + r.semana + '|' + r.inicio + '|' + r.termino;
+      var k = r.mes + '|' + r.semana;
       if (!mapa[k]) { mapa[k] = { chave: k, mes: r.mes, semana: r.semana, inicio: r.inicio, termino: r.termino, itens: [] }; grupos.push(mapa[k]); }
-      mapa[k].itens.push(r);
+      var g = mapa[k];
+      if (r.inicio < g.inicio) g.inicio = r.inicio;
+      if (r.termino > g.termino) g.termino = r.termino;
+      g.itens.push(r);
     });
     return grupos;
   }
@@ -162,6 +184,7 @@ P5.db = (function () {
         out.push('');
         out.push('  [' + String(n).padStart(4, '0') + ']  ' + col(r.grad, 11) + ' RG ' + col(r.rg || '—', 9) + ' ' + col(r.nome, 22) + ' Tipo: ' + C.tipos[r.tipo].label);
         out.push('          ID: ' + r.id + '   |   Criado: ' + U.dataHoraBR(r.criadoEm) + '   |   Atualizado: ' + U.dataHoraBR(r.atualizadoEm));
+        out.push('          Dias: ' + U.rotuloDias(r.dias) + '   (' + r.dias.length + ' dia' + (r.dias.length > 1 ? 's' : '') + ')');
         var obs = P5.rich.texto(r.observacoes);
         out.push('          Observações:' + (obs ? '' : ' —'));
         if (obs) obs.split('\n').forEach(function (l) { out.push('            ' + l); });
@@ -184,7 +207,8 @@ P5.db = (function () {
         var novos = Array.isArray(obj.semanas) ? migrarAntigo(obj) : [sanitizar(obj)];
         novos.forEach(function (r) {
           if (!r) { erros++; return; }
-          if (r.nome !== obj.nome || r.observacoes !== (obj.observacoes || '') || r.semana !== Number(obj.semana) || r.mes !== obj.mes) normalizados++;
+          if (r.nome !== obj.nome || r.observacoes !== (obj.observacoes || '') || r.semana !== Number(obj.semana) || r.mes !== obj.mes ||
+              r.inicio !== obj.inicio || r.termino !== obj.termino || JSON.stringify(r.dias) !== JSON.stringify(obj.dias)) normalizados++;
           if (vistos[r.id]) return;
           vistos[r.id] = 1;
           lista.push(r);
@@ -626,12 +650,12 @@ P5.db = (function () {
     var nome = U.normalizar(rec.nome);
     return registros.find(function (r) {
       var mesmo = rec.rg && r.rg ? r.rg === rec.rg : U.normalizar(r.nome) === nome;
-      return r.id !== rec.id && mesmo && r.inicio <= rec.termino && r.termino >= rec.inicio;
+      return r.id !== rec.id && mesmo && (r.dias || []).some(function (d) { return (rec.dias || []).indexOf(d) !== -1; });
     }) || null;
   }
 
   function descrever(r) {
-    return r.grad + ' ' + r.nome + ' (RG ' + r.rg + ') — ' + U.rotuloSemana(r) + ', ' + U.br(r.inicio) + ' a ' + U.br(r.termino) + ', ' + C.tipos[r.tipo].label;
+    return r.grad + ' ' + r.nome + ' (RG ' + r.rg + ') — ' + U.rotuloSemana(r) + ', ' + U.rotuloDias(r.dias) + ', ' + C.tipos[r.tipo].label;
   }
 
   async function salvar(rec) {
@@ -640,6 +664,7 @@ P5.db = (function () {
     var hoje = U.hojeISO();
     var atual = obter(limpo.id);
     if (atual && bloqueado(atual)) throw new Error('Este lançamento já começou e está bloqueado para alterações.');
+    if (!limpo.dias.length) throw new Error('Marque ao menos um dia de trabalho.');
     if (limpo.inicio < hoje || limpo.termino < hoje) throw new Error('Não é permitido lançar datas anteriores a hoje (' + U.br(hoje) + ').');
     if (!/^[0-9]{5,6}$/.test(limpo.rg)) throw new Error('O RG Militar deve ter de 5 a 6 dígitos.');
     if (limpo.termino > U.domingoDaSemana(limpo.inicio)) throw new Error('O lançamento deve ficar dentro de uma única semana (até domingo, ' + U.br(U.domingoDaSemana(limpo.inicio)) + ').');

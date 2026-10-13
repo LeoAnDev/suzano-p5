@@ -633,6 +633,36 @@
                   </div>
                 </div>
               </div>
+              <div class="field">
+                <span class="field-label" id="r-dias-rotulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-calendar-week" />
+                  </svg>
+                  Dias de trabalho na semana
+                  <span class="req" aria-hidden="true">*</span>
+                </span>
+                <div
+                  class="dias-semana"
+                  id="r-dias"
+                  role="group"
+                  aria-labelledby="r-dias-rotulo"
+                  tabindex="-1"
+                ></div>
+                <div class="dias-atalhos">
+                  <button type="button" class="btn btn-ghost btn-xs" data-dias="todos">
+                    <svg class="icon" aria-hidden="true"><use href="#i-check" /></svg>
+                    Todos
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-xs" data-dias="uteis">
+                    <svg class="icon" aria-hidden="true"><use href="#i-briefcase" /></svg>
+                    Seg a Sex
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-xs" data-dias="limpar">
+                    <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+                    Limpar
+                  </button>
+                </div>
+              </div>
               <p
                 class="hint hint-periodo"
                 id="r-periodo"
@@ -1241,7 +1271,9 @@
                   Folga). A <strong>semana do mês</strong> aparece calculada
                   ao lado do título (ex.: <strong>S4 • outubro/2026</strong>):
                   cada mês tem S1, S2, S3, S4… e, ao virar o mês, recomeça em
-                  S1. Depois selecione a
+                  S1. Em <strong>Dias de trabalho na semana</strong>, clique
+                  nos dias em que o policial vai trabalhar (1, 2, 3 ou todos;
+                  atalhos Todos, Seg a Sex e Limpar). Depois selecione a
                   <strong>Graduação</strong>, informe o
                   <strong>RG Militar</strong> e o
                   <strong>Nome Farda</strong> (um RG já usado preenche o resto

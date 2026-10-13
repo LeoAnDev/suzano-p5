@@ -51,6 +51,7 @@ A mesma pasta funciona nos dois ambientes sem nenhuma alteração.
 | **Tipo de escala** | Select | Carga horária (Expediente, **12 horas**, **24 horas**, **48 horas**) ou situação (Feriado, Troca, Sobreaviso, Ponto facultativo, Folga) |
 | **Data Início** | Calendário | Só aceita **de hoje em diante**. Ao mudar, a Semana se ajusta sozinha |
 | **Data Término** | Calendário | Preenchida com o **domingo** da semana. Nunca antes da Data Início nem depois do domingo |
+| **Dias de trabalho na semana** | Botões SEG a DOM | O policial marca **1, 2, 3 ou todos os dias** em que vai trabalhar naquela semana (atalhos **Todos**, **Seg a Sex** e **Limpar**). Dias já passados ficam bloqueados. A Data Início e a Data Término acompanham o primeiro e o último dia marcados |
 | **Graduação** | Select | SD PM, CB PM, 3º/2º/1º SGT PM, SUBTEN PM, ASP PM, 2º/1º TEN PM, CAP PM, MAJ PM, TEN CEL PM, CEL PM |
 | **RG Militar** | Numérico | **5 a 6 dígitos**, só números (teclado numérico no celular). Um RG já usado **preenche graduação e nome** |
 | **Nome Farda** | Texto com sugestões | Sempre em **MAIÚSCULAS**. Um nome já usado preenche graduação e RG |
@@ -70,11 +71,22 @@ A mesma pasta funciona nos dois ambientes sem nenhuma alteração.
 
 Na tabela e nas Consultas, escolha o **mês** e a semana (**Todas, S1, S2…**): o filtro nunca mistura semanas de meses diferentes.
 
+**Dias de trabalho.** Os dias marcados aparecem em todo o sistema:
+
+| Onde | Como aparece |
+| --- | --- |
+| Tabela de lançamentos e Consultas | Coluna **Dias** com a mini-semana (S T Q Q S S D) e a lista de datas. O cabeçalho de cada semana mostra a **cobertura**: quantos policiais em cada dia |
+| Painel | Tabela **Dia \| Policiais escalados** (quem trabalha em cada dia da semana) e os dias em cada cartão |
+| PDF | Escala dia a dia e coluna **Dias** |
+| `db.txt` | Linha `Dias: SEG 19/10, QUA 21/10…` em cada registro |
+
+O aviso de conflito só aparece se o mesmo policial já estiver escalado **no mesmo dia**.
+
 Cada lançamento fica dentro de **uma única semana**. Se alguém gravar um lançamento com a semana incoerente com as datas (por exemplo, editando o `db.txt`), o sistema corrige sozinho.
 
 Para digitar o mínimo:
 
-- Depois de **Incluir**, o formulário mantém as datas e o tipo, para lançar o próximo policial da mesma semana.
+- Depois de **Incluir**, o formulário mantém os dias marcados e o tipo, para lançar o próximo policial da mesma semana.
 - No painel, o botão **Lançar neste período** já preenche semana e datas (só aparece em períodos futuros).
 
 ---
@@ -266,7 +278,8 @@ Os registros ficam agrupados por **semana e período**. Cada registro tem uma pa
           ID: e-…   |   Criado: 13/10/2026 14:01   |   Atualizado: 13/10/2026 14:01
           Observações:
             COBRIR EVENTO URGENTE
-@registro {"id":"e-…","semana":4,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-19",…}
+          Dias: SEG 19/10, QUA 21/10, SEX 23/10   (3 dias)
+@registro {"id":"e-…","semana":4,"mes":"2026-10","inicio":"2026-10-19","dias":["2026-10-19","2026-10-21","2026-10-23"],…}
   ----------------------------------------------------------------------
 ```
 
@@ -294,6 +307,7 @@ Para garantir **segurança e transparência**, a escala não pode ser alterada r
 | Os calendários só permitem datas **de hoje em diante** | Interface (`min` dos campos de data) |
 | A Data Término nunca fica antes da Data Início | Interface e validação |
 | Cada lançamento fica dentro de **uma única semana** (segunda a domingo) | Interface e camada de dados |
+| É preciso marcar **ao menos um dia** de trabalho; os dias ficam todos na mesma semana | Interface e camada de dados |
 | A **semana do mês** (S1, S2…) é **calculada pela Data Início**, nunca escolhida à mão | Interface e camada de dados, inclusive na leitura do `db.txt` |
 | Lançar ou alterar com data anterior a hoje é **recusado** | Validação do formulário **e** camada de dados (`db.js`), inclusive se alguém tentar pelo console do navegador |
 | Lançamento cujo período **já começou** fica **bloqueado** (cadeado): não pode ser editado nem excluído | Interface e camada de dados |

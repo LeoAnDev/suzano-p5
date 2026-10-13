@@ -46,12 +46,27 @@ P5.report = (function () {
     );
   }
 
+  /* Escala dia a dia: quem trabalha em cada dia da semana */
+  function tabelaPorDia(g) {
+    var dias = U.diasDaSemana(g.inicio).filter(function (d) {
+      return g.itens.some(function (r) { return r.dias.indexOf(d) !== -1; });
+    });
+    return el('table', { class: 'pr-tabela pr-tabela-dias' },
+      el('thead', null, el('tr', null, el('th', { class: 'pr-col-dia', text: 'Dia' }), el('th', { text: 'Policiais escalados' }))),
+      el('tbody', null, dias.map(function (d) {
+        var nomes = g.itens.filter(function (r) { return r.dias.indexOf(d) !== -1; })
+          .map(function (r) { return r.grad + ' ' + r.nome + ' (' + C.tipos[r.tipo].label + ')'; });
+        return el('tr', null, el('td', null, el('strong', { text: U.diaSemana(d) }), ' ' + U.br(d)), el('td', { text: nomes.join(' • ') }));
+      })));
+  }
+
   function blocoGrupo(g) {
     return el('section', { class: 'pr-semana' },
       el('div', { class: 'pr-semana-head' },
         el('h3', { text: 'S' + g.semana + ' — ' + g.semana + 'ª SEMANA DE ' + U.nomeMes(g.mes).toUpperCase() + ' — ' + U.br(g.inicio) + ' a ' + U.br(g.termino) }),
         el('span', { text: U.diaSemana(g.inicio) + ' a ' + U.diaSemana(g.termino) + '  •  ' + C.horario.dias + ', ' + C.horario.inicio + ' às ' + C.horario.fim })
       ),
+      tabelaPorDia(g),
       el('table', { class: 'pr-tabela' },
         el('thead', null, el('tr', null,
           el('th', { class: 'pr-col-n', text: 'Nº' }),
@@ -59,6 +74,7 @@ P5.report = (function () {
           el('th', { class: 'pr-col-rg', text: 'RG Militar' }),
           el('th', { class: 'pr-col-nome', text: 'Nome farda' }),
           el('th', { class: 'pr-col-tipo', text: 'Tipo de escala' }),
+          el('th', { class: 'pr-col-dias', text: 'Dias' }),
           el('th', { text: 'Observações' }))),
         el('tbody', null, g.itens.map(function (r, i) {
           var obs = el('td', { class: 'pr-obs' });
@@ -70,6 +86,7 @@ P5.report = (function () {
             el('td', { text: r.rg || '—' }),
             el('td', null, el('strong', { text: r.nome })),
             el('td', null, el('span', { class: 'pr-tag pr-' + r.tipo, text: C.tipos[r.tipo].label })),
+            el('td', { class: 'pr-dias', text: U.rotuloDias(r.dias) }),
             obs);
         }))
       )

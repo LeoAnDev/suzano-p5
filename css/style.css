@@ -2460,3 +2460,247 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   -webkit-hyphens: auto;
   hyphens: auto;
 }
+
+/* ---------- Dias de trabalho na semana ---------- */
+.dias-semana {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+.dias-semana[aria-invalid="true"] {
+  outline: 2px solid var(--danger);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+.dia-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  min-height: 62px;
+  padding: 0.45rem 0.2rem 0.4rem;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease), border-color 0.2s, transform 0.15s var(--ease), box-shadow 0.2s var(--ease);
+}
+.dia-btn:hover:not(:disabled) {
+  border-color: var(--focus);
+}
+.dia-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+.dia-btn.fds .dia-sigla {
+  color: var(--accent-text);
+}
+.dia-btn.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 2px 8px rgba(245, 130, 32, 0.35);
+}
+.dia-btn.on .dia-sigla {
+  color: var(--on-accent);
+}
+.dia-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.dia-sigla {
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+}
+.dia-num {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+.dia-ico {
+  width: 0.85em;
+  height: 0.85em;
+  opacity: 0.8;
+}
+.dias-atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+}
+
+/* Mini-semana (tabela, painel) */
+.faixa-dias {
+  display: inline-flex;
+  gap: 2px;
+}
+.faixa-dia {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 20px;
+  border-radius: 4px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+.faixa-dia.on {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.col-dias {
+  white-space: nowrap;
+}
+.pm-dias {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+  font-size: 0.82rem;
+}
+
+/* Painel: escala dia a dia */
+.tabela-dias-painel {
+  margin-top: 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.tabela-por-dia tbody th {
+  width: 190px;
+  font-weight: 400;
+}
+.tabela-por-dia tbody tr.linha-hoje {
+  background: var(--accent-soft);
+}
+.tabela-por-dia tbody tr.dia-vazio {
+  opacity: 0.6;
+}
+.pm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.pm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 0.85rem;
+}
+.pm-chip .grad {
+  display: inline;
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .dia-btn {
+    min-height: 54px;
+    padding: 0.35rem 0.1rem;
+  }
+  .dia-num {
+    font-size: 0.68rem;
+  }
+  .tabela-por-dia tbody th {
+    width: auto;
+  }
+  .tabela-responsiva td.col-dias {
+    grid-column: 1;
+  }
+}
+
+@media print {
+  .pr-tabela-dias {
+    margin-bottom: 3mm;
+  }
+  .pr-col-dia {
+    width: 38mm;
+  }
+  .pr-col-dias {
+    width: 34mm;
+  }
+  .pr-dias {
+    font-size: 8pt;
+  }
+}
+
+/* Lista de dias na tabela e cobertura da semana */
+.dias-lista {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  white-space: normal;
+  max-width: 190px;
+  line-height: 1.35;
+}
+.linha-grupo .grupo-info + .cobertura {
+  margin-top: 0.45rem;
+}
+.cobertura {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.cob-dia {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.cob-dia strong {
+  color: var(--text);
+}
+.cob-dia.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.cob-dia.on strong {
+  color: var(--accent-text);
+}
+.cob-sigla {
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+@media (max-width: 760px) {
+  .dias-lista {
+    max-width: none;
+  }
+}
+.tabela-por-dia tbody th {
+  text-align: left;
+}
+.tabela-por-dia .dia-nome {
+  display: block;
+  font-weight: 650;
+}
+.tabela-por-dia .dia-data {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.pm-dias {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+.tabela-por-dia tbody th {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.tabela-por-dia tbody tr:last-child > th {
+  border-bottom: none;
+}

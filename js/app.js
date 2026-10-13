@@ -427,6 +427,16 @@
     return el('button', { type: 'button', class: 'btn-acao ' + (classe || ''), title: rotulo, 'aria-label': rotulo, on: { click: fn } }, U.icone(icone));
   }
 
+  /* Cobertura da semana: quantos policiais em cada dia (SEG a DOM) */
+  function coberturaSemana(g) {
+    var siglas = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
+    return el('div', { class: 'cobertura', 'aria-label': 'Policiais por dia' }, U.diasDaSemana(g.inicio).map(function (d, i) {
+      var n = g.itens.filter(function (r) { return r.dias.indexOf(d) !== -1; }).length;
+      return el('span', { class: 'cob-dia' + (n ? ' on' : ''), title: U.diaSemana(d) + ', ' + U.br(d) + ': ' + n + ' policial(is)' },
+        el('span', { class: 'cob-sigla', text: siglas[i] + ' ' + U.brCurto(d).slice(0, 2) }), el('strong', { text: String(n) }));
+    }));
+  }
+
   function tabelaRegistros(lista, opcoes) {
     opcoes = opcoes || {};
     if (!lista.length) {
@@ -439,13 +449,14 @@
     var tbody = el('tbody');
     grupos.forEach(function (g) {
       tbody.appendChild(el('tr', { class: 'linha-grupo' },
-        el('th', { colspan: '6', scope: 'colgroup' },
+        el('th', { colspan: '7', scope: 'colgroup' },
           el('div', { class: 'grupo-info' },
             U.badgeSemana(g),
             el('span', { class: 'grupo-periodo' }, U.icone('i-calendar'), U.br(g.inicio) + ' a ' + U.br(g.termino)),
-            el('span', { class: 'grupo-dias', text: U.diaCurto(g.inicio) + '–' + U.diaCurto(g.termino) + ' • ' + g.itens.length + ' policial(is)' }),
+            el('span', { class: 'grupo-dias', text: g.itens.length + ' policial(is)' }),
             U.badgeSituacao(g)
-          )
+          ),
+          coberturaSemana(g)
         )
       ));
       g.itens.forEach(function (r) {
@@ -466,6 +477,9 @@
           el('td', { 'data-label': 'RG Militar', class: 'col-rg', text: r.rg || '—' }),
           el('td', { 'data-label': 'Nome farda' }, el('strong', { text: r.nome })),
           el('td', { 'data-label': 'Tipo' }, U.badgeTipo(r.tipo)),
+          el('td', { 'data-label': 'Dias', class: 'col-dias' },
+            U.faixaDias(r),
+            el('span', { class: 'dias-lista', text: U.rotuloDias(r.dias) })),
           el('td', { 'data-label': 'Observações', class: 'col-obs' }, obs ? el('span', { class: 'obs-resumo', title: P5.rich.texto(r.observacoes), text: obs }) : el('span', { class: 'texto-suave', text: '—' })),
           el('td', { 'data-label': 'Ações', class: 'col-acoes' }, acoes)
         ));
@@ -480,6 +494,7 @@
           el('th', { scope: 'col', text: 'RG Militar' }),
           el('th', { scope: 'col', text: 'Nome farda' }),
           el('th', { scope: 'col', text: 'Tipo' }),
+          el('th', { scope: 'col', text: 'Dias' }),
           el('th', { scope: 'col', text: 'Observações' }),
           el('th', { scope: 'col', class: 'col-acoes', text: 'Ações' }))),
         tbody
@@ -561,6 +576,28 @@
       el('p', null, C.horario.dias, el('br'), C.horario.inicio + ' às ' + C.horario.fim)
     ));
 
+    /* Escala dia a dia (como na página original): quem trabalha em cada dia */
+    var hojeISO = U.hojeISO();
+    alvo.appendChild(el('div', { class: 'tabela-wrap tabela-dias-painel' },
+      el('table', { class: 'tabela tabela-por-dia' },
+        el('caption', { class: 'sr-only', text: 'Policiais escalados por dia' }),
+        el('thead', null, el('tr', null, el('th', { scope: 'col', text: 'Dia' }), el('th', { scope: 'col', text: 'Policiais escalados' }))),
+        el('tbody', null, U.diasDaSemana(g.inicio).map(function (d) {
+          var quem = g.itens.filter(function (r) { return r.dias.indexOf(d) !== -1; });
+          return el('tr', { class: (d === hojeISO ? 'linha-hoje' : '') + (quem.length ? '' : ' dia-vazio') },
+            el('th', { scope: 'row' },
+              el('span', { class: 'dia-nome', text: U.diaSemana(d) }),
+              el('span', { class: 'dia-data', text: U.br(d) }),
+              d === hojeISO ? el('span', { class: 'badge badge-hoje', text: 'HOJE' }) : null),
+            el('td', null, quem.length
+              ? el('div', { class: 'pm-chips' }, quem.map(function (r) {
+                  return el('span', { class: 'pm-chip' }, el('span', { class: 'grad', text: r.grad }), el('strong', { text: r.nome }), U.badgeTipo(r.tipo));
+                }))
+              : el('span', { class: 'texto-suave', text: '—' })));
+        }))
+      )
+    ));
+
     alvo.appendChild(el('div', { class: 'equipes' }, g.itens.map(function (r) {
       var obs = el('div', { class: 'obs-rica' });
       if (r.observacoes) obs.appendChild(P5.rich.fragmento(r.observacoes));
@@ -570,6 +607,7 @@
           el('div', null, el('span', { class: 'grad', text: r.grad + (r.rg ? ' • RG ' + r.rg : '') }), el('strong', { class: 'pm-nome', text: r.nome })),
           U.badgeTipo(r.tipo)
         ),
+        el('div', { class: 'pm-dias' }, U.faixaDias(r), el('span', { class: 'texto-suave', text: r.dias.length + ' dia' + (r.dias.length > 1 ? 's' : '') + ': ' + U.rotuloDias(r.dias) })),
         r.observacoes ? obs : null
       );
     })));
@@ -578,8 +616,9 @@
       el('button', { type: 'button', class: 'btn btn-primary', on: { click: function () {
         P5.report.imprimir({ titulo: U.rotuloSemana(g) + ' — ' + U.br(g.inicio) + ' a ' + U.br(g.termino), filtros: ['Período individual'], registros: g.itens });
       } } }, U.icone('i-printer'), 'Imprimir PDF deste período'),
-      g.inicio < U.hojeISO() ? null : el('button', { type: 'button', class: 'btn btn-outline', on: { click: function () {
-        novoFormulario({ inicio: g.inicio, termino: g.termino });
+      U.domingoDaSemana(g.inicio) < U.hojeISO() ? null : el('button', { type: 'button', class: 'btn btn-outline', on: { click: function () {
+        var ini = U.segundaDaSemana(g.inicio) < U.hojeISO() ? U.hojeISO() : U.segundaDaSemana(g.inicio);
+        novoFormulario({ inicio: ini, termino: U.domingoDaSemana(g.inicio) });
         irPara('lancar');
         $('#r-grad').focus();
       } } }, U.icone('i-user-plus'), 'Lançar neste período')
@@ -593,6 +632,7 @@
   var editandoId = null;
   var destaqueId = null;
   var dataAutomatica = true;
+  var diasSel = [];          // dias de trabalho marcados (ISO, ordenados)
 
   /* Calendários: só permitem de hoje em diante */
   function aplicarMinimos() {
@@ -629,22 +669,76 @@
     $('#r-inicio').value = ini;
     $('#r-termino').value = U.domingoDaSemana(ini);
     dataAutomatica = true;
+    diasSel = U.diasDoIntervalo(ini, U.domingoDaSemana(ini));
     atualizarPeriodo();
   }
+
+  /* ---------- Dias de trabalho: o policial marca os dias da semana ---------- */
+  var SIGLAS = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
+  function semanaDoFormulario() { return U.diasDaSemana($('#r-inicio').value || U.hojeISO()); }
+
+  function renderDias() {
+    var hoje = U.hojeISO();
+    var cont = U.esvaziar($('#r-dias'));
+    semanaDoFormulario().forEach(function (d, i) {
+      var passado = d < hoje;
+      var on = diasSel.indexOf(d) !== -1;
+      cont.appendChild(el('button', {
+        type: 'button', class: 'dia-btn' + (on ? ' on' : '') + (i > 4 ? ' fds' : ''),
+        'aria-pressed': String(on), disabled: passado, 'data-dia': d,
+        title: U.diaSemana(d) + ', ' + U.br(d) + (passado ? ' (já passou)' : '')
+      }, el('span', { class: 'dia-sigla', text: SIGLAS[i] }), el('span', { class: 'dia-num', text: U.brCurto(d) }), U.icone(on ? 'i-check' : 'i-plus', 'dia-ico')));
+    });
+  }
+
+  /* Datas do formulário acompanham os dias marcados (primeiro e último) */
+  function aplicarDias(lista) {
+    diasSel = lista.filter(function (d, i) { return lista.indexOf(d) === i; }).sort();
+    if (diasSel.length) {
+      $('#r-inicio').value = diasSel[0];
+      $('#r-termino').value = diasSel[diasSel.length - 1];
+      sincronizarAtalho(diasSel[0]);
+    }
+    dataAutomatica = false;
+    atualizarPeriodo();
+  }
+
+  $('#r-dias').addEventListener('click', function (e) {
+    var b = e.target.closest('.dia-btn');
+    if (!b || b.disabled) return;
+    var d = b.dataset.dia;
+    var lista = diasSel.indexOf(d) === -1 ? diasSel.concat(d) : diasSel.filter(function (x) { return x !== d; });
+    $('#r-dias').removeAttribute('aria-invalid');
+    aplicarDias(lista);
+    var mesmo = $('.dia-btn[data-dia="' + d + '"]');
+    if (mesmo) mesmo.focus();
+  });
+
+  $$('[data-dias]', form).forEach(function (b) {
+    b.addEventListener('click', function () {
+      var hoje = U.hojeISO();
+      var semana = semanaDoFormulario().filter(function (d) { return d >= hoje; });
+      if (b.dataset.dias === 'todos') aplicarDias(semana);
+      else if (b.dataset.dias === 'uteis') aplicarDias(semana.filter(function (d) { var w = U.deISO(d).getDay(); return w >= 1 && w <= 5; }));
+      else { diasSel = []; atualizarPeriodo(); }
+    });
+  });
 
   function atualizarPeriodo() {
     aplicarMinimos();
     atualizarSemanaCalculada();
+    renderDias();
     var ini = $('#r-inicio').value, fim = $('#r-termino').value;
     var hint = U.esvaziar($('#r-periodo'));
     if (!ini || !fim) return;
+    if (!diasSel.length) { hint.className = 'hint hint-periodo hint-erro'; hint.appendChild(U.icone('i-alert')); hint.appendChild(document.createTextNode('Marque ao menos um dia de trabalho na semana.')); return; }
     if (ini < U.hojeISO() || fim < U.hojeISO()) { hint.className = 'hint hint-periodo hint-erro'; hint.appendChild(U.icone('i-lock')); hint.appendChild(document.createTextNode('Datas anteriores a hoje (' + U.br(U.hojeISO()) + ') não são permitidas.')); return; }
     var dias = U.diasEntre(ini, fim) + 1;
     if (dias < 1) { hint.className = 'hint hint-periodo hint-erro'; hint.appendChild(U.icone('i-alert')); hint.appendChild(document.createTextNode('A Data Término deve ser igual ou posterior à Data Início.')); return; }
     hint.className = 'hint hint-periodo';
     hint.appendChild(U.icone('i-info'));
     if (fim > U.domingoDaSemana(ini)) { hint.className = 'hint hint-periodo hint-erro'; hint.appendChild(U.icone('i-alert')); hint.appendChild(document.createTextNode('O lançamento deve terminar até domingo, ' + U.br(U.domingoDaSemana(ini)) + '.')); return; }
-    hint.appendChild(document.createTextNode(U.semanaDoMes(ini) + 'ª semana de ' + U.nomeMes(U.mesDe(ini)) + ' • ' + dias + ' dia(s) • ' + U.diaSemana(ini) + ' a ' + U.diaSemana(fim)));
+    hint.appendChild(document.createTextNode(U.semanaDoMes(ini) + 'ª semana de ' + U.nomeMes(U.mesDe(ini)) + ' • ' + diasSel.length + ' dia(s): ' + U.rotuloDias(diasSel)));
   }
 
   function atualizarIconeTipo() {
@@ -672,7 +766,11 @@
     editor.limpar();
     if (manter) {
       if (manter.tipo) $('#r-tipo').value = manter.tipo;
-      if (manter.inicio) { $('#r-inicio').value = manter.inicio; $('#r-termino').value = manter.termino; dataAutomatica = false; atualizarPeriodo(); }
+      if (manter.inicio) {
+        $('#r-inicio').value = manter.inicio; $('#r-termino').value = manter.termino; dataAutomatica = false;
+        diasSel = (manter.dias || U.diasDoIntervalo(manter.inicio, manter.termino)).filter(function (d) { return d >= U.hojeISO(); });
+        atualizarPeriodo();
+      }
       else sugerirDatas();
     } else {
       definirAtalho(0);
@@ -693,6 +791,7 @@
     $('#r-tipo').value = r.tipo;
     $('#r-inicio').value = r.inicio;
     $('#r-termino').value = r.termino;
+    diasSel = (r.dias || []).slice();
     $('#r-grad').value = r.grad;
     $('#r-rg').value = r.rg || '';
     $('#r-nome').value = r.nome;
@@ -713,7 +812,7 @@
     if (!r) return;
     if (P5.db.bloqueado(r)) { toast('Este lançamento já começou e não pode ser excluído.', 'aviso'); return; }
     var ok = await confirmar('Excluir lançamento?',
-      r.grad + ' ' + r.nome + ' — ' + U.rotuloSemana(r) + ' (' + U.br(r.inicio) + ' a ' + U.br(r.termino) + '). O registro será removido do db.txt. Esta ação não pode ser desfeita.', 'Excluir');
+      r.grad + ' ' + r.nome + ' — ' + U.rotuloSemana(r) + ' (dias: ' + U.rotuloDias(r.dias) + '). O registro será removido do db.txt. Esta ação não pode ser desfeita.', 'Excluir');
     if (!ok) return;
     await prepararArquivo();
     var linha = $('tr[data-id="' + id + '"]');
@@ -735,10 +834,16 @@
     if (ini) {
       sincronizarAtalho(ini);
       if (!fim || fim < ini || fim > U.domingoDaSemana(ini)) $('#r-termino').value = U.domingoDaSemana(ini);
+      diasSel = U.diasDoIntervalo(ini, $('#r-termino').value);
     }
     atualizarPeriodo();
   });
-  $('#r-termino').addEventListener('change', function () { dataAutomatica = false; atualizarPeriodo(); });
+  $('#r-termino').addEventListener('change', function () {
+    dataAutomatica = false;
+    var ini = $('#r-inicio').value, fim = this.value;
+    if (ini && fim && fim >= ini && fim <= U.domingoDaSemana(ini)) diasSel = U.diasDoIntervalo(ini, fim);
+    atualizarPeriodo();
+  });
   ['#r-inicio', '#r-termino'].forEach(function (s) { $(s).addEventListener('focus', aplicarMinimos); });
   $('#r-tipo').addEventListener('change', atualizarIconeTipo);
 
@@ -784,8 +889,9 @@
       semana: U.semanaDoMes($('#r-inicio').value),
       mes: U.mesDe($('#r-inicio').value),
       tipo: $('#r-tipo').value,
-      inicio: $('#r-inicio').value,
-      termino: $('#r-termino').value,
+      inicio: diasSel[0] || $('#r-inicio').value,
+      termino: diasSel[diasSel.length - 1] || $('#r-termino').value,
+      dias: diasSel.slice(),
       grad: $('#r-grad').value,
       rg: $('#r-rg').value.replace(/\D/g, ''),
       nome: $('#r-nome').value.trim().replace(/\s+/g, ' '),
@@ -804,6 +910,7 @@
     if (r.termino && r.termino < hoje) marcar($('#r-termino'), 'A Data Término não pode ser anterior a hoje (' + U.br(hoje) + ').');
     if (r.inicio && r.termino && r.termino < r.inicio) marcar($('#r-termino'), 'A Data Término deve ser igual ou posterior à Data Início.');
     if (r.inicio && r.termino && r.termino > U.domingoDaSemana(r.inicio)) marcar($('#r-termino'), 'O lançamento deve ficar dentro de uma única semana (até domingo, ' + U.br(U.domingoDaSemana(r.inicio)) + ').');
+    if (!r.dias.length) marcar($('#r-dias'), 'Marque ao menos um dia de trabalho na semana.');
     if (!r.grad) marcar($('#r-grad'), 'Selecione a graduação.');
     if (!r.rg) marcar($('#r-rg'), 'Informe o RG Militar.');
     else if (r.rg.length < 5 || r.rg.length > 6) marcar($('#r-rg'), 'O RG Militar deve ter de 5 a 6 dígitos.');
@@ -833,7 +940,7 @@
 
     var conflito = P5.db.conflito(r);
     if (conflito && !(await confirmar('Período sobreposto',
-      conflito.grad + ' ' + conflito.nome + ' já tem lançamento de ' + U.br(conflito.inicio) + ' a ' + U.br(conflito.termino) + ' (' + U.rotuloSemana(conflito) + '). Deseja salvar mesmo assim?', 'Salvar mesmo assim', false))) return;
+      conflito.grad + ' ' + conflito.nome + ' já está escalado em ' + U.rotuloDias(conflito.dias.filter(function (d) { return r.dias.indexOf(d) !== -1; })) + ' (' + U.rotuloSemana(conflito) + '). Deseja salvar mesmo assim?', 'Salvar mesmo assim', false))) return;
 
     var btn = $('#btn-salvar');
     btn.disabled = true;
@@ -843,7 +950,7 @@
       setTimeout(function () { destaqueId = null; }, 2500);
       if (res.novo) {
         // mantém semana, datas e tipo para lançar o próximo policial com o mínimo de digitação
-        novoFormulario({ inicio: r.inicio, termino: r.termino, tipo: r.tipo });
+        novoFormulario({ inicio: r.inicio, termino: r.termino, dias: r.dias, tipo: r.tipo });
         $('#r-grad').focus();
       } else {
         novoFormulario();
@@ -948,8 +1055,7 @@
 
   function filtrar(f) {
     return P5.db.todos().filter(function (r) {
-      if (f.de && r.termino < f.de) return false;
-      if (f.ate && r.inicio > f.ate) return false;
+      if ((f.de || f.ate) && !r.dias.some(function (d) { return (!f.de || d >= f.de) && (!f.ate || d <= f.ate); })) return false;
       if (f.mes && r.mes !== f.mes) return false;
       if (f.semana && String(r.semana) !== f.semana) return false;
       if (f.tipo && r.tipo !== f.tipo) return false;

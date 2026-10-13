@@ -47,6 +47,33 @@ P5.util = (function () {
     if (!/^\d{4}-\d{2}$/.test(mes || '')) return '';
     return MESES[Number(mes.slice(5, 7)) - 1] + '/' + mes.slice(0, 4);
   }
+  /* Dias da semana (segunda a domingo) que contém a data */
+  function diasDaSemana(iso) {
+    var seg = segundaDaSemana(iso);
+    if (!seg) return [];
+    return [0, 1, 2, 3, 4, 5, 6].map(function (i) { return somarDias(seg, i); });
+  }
+  /* Todos os dias entre duas datas (inclusive) */
+  function diasDoIntervalo(ini, fim) {
+    var out = [];
+    if (!deISO(ini) || !deISO(fim) || fim < ini) return out;
+    for (var d = ini; d <= fim && out.length < 62; d = somarDias(d, 1)) out.push(d);
+    return out;
+  }
+  /* 'SEG 19/10, QUA 21/10' */
+  function rotuloDias(dias) {
+    return (dias || []).map(function (d) { return diaCurto(d) + ' ' + brCurto(d); }).join(', ');
+  }
+  /* Mini-semana: 7 quadradinhos (S T Q Q S S D) com os dias trabalhados */
+  function faixaDias(r) {
+    var marcados = r.dias || [];
+    var letras = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+    return el('span', { class: 'faixa-dias', role: 'img', 'aria-label': 'Dias: ' + rotuloDias(marcados), title: rotuloDias(marcados) },
+      diasDaSemana(r.inicio).map(function (d, i) {
+        var on = marcados.indexOf(d) !== -1;
+        return el('span', { class: 'faixa-dia' + (on ? ' on' : ''), text: letras[i] });
+      }));
+  }
   function rotuloSemana(r) { // 'S3 • outubro/2026'
     return 'S' + r.semana + ' • ' + nomeMes(r.mes);
   }
@@ -149,6 +176,7 @@ P5.util = (function () {
     normalizar: normalizar, limpar: limpar, uid: uid, nomeCompleto: nomeCompleto,
     icone: icone, el: el, esvaziar: esvaziar, situacao: situacao, badgeSituacao: badgeSituacao, badgeSemana: badgeSemana, badgeTipo: badgeTipo,
     segundaDaSemana: segundaDaSemana, domingoDaSemana: domingoDaSemana,
-    semanaDoMes: semanaDoMes, mesDe: mesDe, nomeMes: nomeMes, rotuloSemana: rotuloSemana
+    semanaDoMes: semanaDoMes, mesDe: mesDe, nomeMes: nomeMes, rotuloSemana: rotuloSemana,
+    diasDaSemana: diasDaSemana, diasDoIntervalo: diasDoIntervalo, rotuloDias: rotuloDias, faixaDias: faixaDias
   };
 })();
