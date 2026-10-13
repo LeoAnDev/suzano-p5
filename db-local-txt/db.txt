@@ -2,7 +2,7 @@
 #  DB-LOCAL-TXT • ESCALA P5 • COMUNICAÇÃO SOCIAL • 29º BPM
 #  Cada registro tem um bloco legível e uma linha "@registro" (JSON),
 #  que é a parte lida pelo sistema. Não altere a estrutura dessa linha.
-#  Atualizado em: 13/10/2026 16:34   |   Registros: 3   |   Períodos: 3
+#  Atualizado em: 13/10/2026 16:37   |   Registros: 3   |   Períodos: 3
 ########################################################################
 
 ========================================================================
@@ -12,8 +12,9 @@
 
   [0001]  SUBTEN PM   RG 75513     LEONARDO               Tipo: Expediente
           ID: e-92a0cbbc10279c9c   |   Criado: 13/10/2026 15:13   |   Atualizado: 13/10/2026 16:34
+          Dias: TER 13/10, QUA 14/10, QUI 15/10   (3 dias)
           Observações: —
-@registro {"id":"e-92a0cbbc10279c9c","semana":3,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-13","termino":"2026-10-15","grad":"SUBTEN PM","rg":"75513","nome":"LEONARDO","observacoes":"","criadoEm":1791915191382,"atualizadoEm":1791920053389}
+@registro {"id":"e-92a0cbbc10279c9c","semana":3,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-13","termino":"2026-10-15","dias":["2026-10-13","2026-10-14","2026-10-15"],"grad":"SUBTEN PM","rg":"75513","nome":"LEONARDO","observacoes":"","criadoEm":1791915191382,"atualizadoEm":1791920053389}
   ----------------------------------------------------------------------
 
 ========================================================================
@@ -23,8 +24,9 @@
 
   [0002]  SUBTEN PM   RG 75514     ARANTES                Tipo: Expediente
           ID: e-c0bf6fe50beb0ff9   |   Criado: 13/10/2026 15:13   |   Atualizado: 13/10/2026 15:14
+          Dias: SEG 19/10, TER 20/10, QUA 21/10, QUI 22/10, SEX 23/10   (5 dias)
           Observações: —
-@registro {"id":"e-c0bf6fe50beb0ff9","semana":4,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-19","termino":"2026-10-23","grad":"SUBTEN PM","rg":"75514","nome":"ARANTES","observacoes":"","criadoEm":1791915220474,"atualizadoEm":1791915250190}
+@registro {"id":"e-c0bf6fe50beb0ff9","semana":4,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-19","termino":"2026-10-23","dias":["2026-10-19","2026-10-20","2026-10-21","2026-10-22","2026-10-23"],"grad":"SUBTEN PM","rg":"75514","nome":"ARANTES","observacoes":"","criadoEm":1791915220474,"atualizadoEm":1791915250190}
   ----------------------------------------------------------------------
 
 ========================================================================
@@ -34,8 +36,9 @@
 
   [0003]  SUBTEN PM   RG 75501     L. OLIVEIRA            Tipo: Expediente
           ID: e-4c31a1b8d5c1d918   |   Criado: 13/10/2026 15:13   |   Atualizado: 13/10/2026 15:14
+          Dias: SEG 26/10, TER 27/10, QUA 28/10, QUI 29/10, SEX 30/10   (5 dias)
           Observações: —
-@registro {"id":"e-4c31a1b8d5c1d918","semana":5,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-26","termino":"2026-10-30","grad":"SUBTEN PM","rg":"75501","nome":"L. OLIVEIRA","observacoes":"","criadoEm":1791915204116,"atualizadoEm":1791915287674}
+@registro {"id":"e-4c31a1b8d5c1d918","semana":5,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-26","termino":"2026-10-30","dias":["2026-10-26","2026-10-27","2026-10-28","2026-10-29","2026-10-30"],"grad":"SUBTEN PM","rg":"75501","nome":"L. OLIVEIRA","observacoes":"","criadoEm":1791915204116,"atualizadoEm":1791915287674}
   ----------------------------------------------------------------------
 
 # FIM DO ARQUIVO
