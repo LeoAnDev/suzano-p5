@@ -42,7 +42,11 @@
       setTimeout(function () { t.remove(); }, reduzMovimento ? 0 : 320);
     }
     $('#toasts').appendChild(t);
-    setTimeout(sair, tipo === 'erro' ? 8000 : 4500);
+    // avisos e erros ficam mais tempo; o mouse em cima pausa o fechamento
+    var duracao = tipo === 'erro' || tipo === 'aviso' ? 10000 : 4500;
+    var timer = setTimeout(sair, duracao);
+    t.addEventListener('mouseenter', function () { clearTimeout(timer); });
+    t.addEventListener('mouseleave', function () { timer = setTimeout(sair, 2500); });
   }
 
   /* Modal no estilo "sheet" do macOS: entra e sai com animação */
