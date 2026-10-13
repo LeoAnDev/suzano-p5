@@ -2,18 +2,18 @@
 #  DB-LOCAL-TXT • ESCALA P5 • COMUNICAÇÃO SOCIAL • 29º BPM
 #  Cada registro tem um bloco legível e uma linha "@registro" (JSON),
 #  que é a parte lida pelo sistema. Não altere a estrutura dessa linha.
-#  Atualizado em: 13/10/2026 15:27   |   Registros: 3   |   Períodos: 3
+#  Atualizado em: 13/10/2026 16:34   |   Registros: 3   |   Períodos: 3
 ########################################################################
 
 ========================================================================
-  S3 • 3ª SEMANA DE OUTUBRO/2026  •  13/10/2026 (Terça-feira) a 16/10/2026 (Sexta-feira)
+  S3 • 3ª SEMANA DE OUTUBRO/2026  •  13/10/2026 (Terça-feira) a 15/10/2026 (Quinta-feira)
   Efetivo: 1 policial(is)
 ========================================================================
 
   [0001]  SUBTEN PM   RG 75513     LEONARDO               Tipo: Expediente
-          ID: e-92a0cbbc10279c9c   |   Criado: 13/10/2026 15:13   |   Atualizado: 13/10/2026 15:13
+          ID: e-92a0cbbc10279c9c   |   Criado: 13/10/2026 15:13   |   Atualizado: 13/10/2026 16:34
           Observações: —
-@registro {"id":"e-92a0cbbc10279c9c","semana":3,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-13","termino":"2026-10-16","grad":"SUBTEN PM","rg":"75513","nome":"LEONARDO","observacoes":"","criadoEm":1791915191382,"atualizadoEm":1791915235518}
+@registro {"id":"e-92a0cbbc10279c9c","semana":3,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-13","termino":"2026-10-15","grad":"SUBTEN PM","rg":"75513","nome":"LEONARDO","observacoes":"","criadoEm":1791915191382,"atualizadoEm":1791920053389}
   ----------------------------------------------------------------------
 
 ========================================================================
