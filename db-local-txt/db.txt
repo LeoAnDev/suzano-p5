@@ -2,7 +2,7 @@
 #  DB-LOCAL-TXT • ESCALA P5 • COMUNICAÇÃO SOCIAL • 29º BPM
 #  Cada registro tem um bloco legível e uma linha "@registro" (JSON),
 #  que é a parte lida pelo sistema. Não altere a estrutura dessa linha.
-#  Atualizado em: 13/10/2026 15:00   |   Registros: 2   |   Períodos: 2
+#  Atualizado em: 13/10/2026 15:01   |   Registros: 1   |   Períodos: 1
 ########################################################################
 
 ========================================================================
@@ -14,17 +14,6 @@
           ID: e-399dff28dea5d01f   |   Criado: 13/10/2026 14:51   |   Atualizado: 13/10/2026 14:58
           Observações: —
 @registro {"id":"e-399dff28dea5d01f","semana":1,"tipo":"expediente","inicio":"2026-10-13","termino":"2026-10-16","grad":"1º SGT PM","rg":"79284","nome":"SUZANO","observacoes":"","criadoEm":1791913885234,"atualizadoEm":1791914325775}
-  ----------------------------------------------------------------------
-
-========================================================================
-  SEMANA 2  •  19/10/2026 (Segunda-feira) a 23/10/2026 (Sexta-feira)
-  Efetivo: 1 policial(is)
-========================================================================
-
-  [0002]  SUBTEN PM   RG 75513     LEONARDO               Tipo: Expediente
-          ID: e-3432c04ce1b13f8d   |   Criado: 13/10/2026 14:46   |   Atualizado: 13/10/2026 15:00
-          Observações: —
-@registro {"id":"e-3432c04ce1b13f8d","semana":2,"tipo":"expediente","inicio":"2026-10-19","termino":"2026-10-23","grad":"SUBTEN PM","rg":"75513","nome":"LEONARDO","observacoes":"","criadoEm":1791913584838,"atualizadoEm":1791914400886}
   ----------------------------------------------------------------------
 
 # FIM DO ARQUIVO
