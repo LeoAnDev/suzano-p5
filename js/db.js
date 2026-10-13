@@ -73,7 +73,8 @@ P5.db = (function () {
     if (!r || typeof r !== 'object') return null;
     var rec = {
       id: RE_ID.test(r.id || '') ? r.id : U.uid('e'),
-      semana: U.deISO(r.inicio) ? U.semanaDoCiclo(r.inicio) : (Number(r.semana) === 2 ? 2 : 1), // sempre coerente com as datas
+      semana: U.semanaDoMes(r.inicio),   // S1, S2… dentro do mês (calculada pela data)
+      mes: U.mesDe(r.inicio),            // 'AAAA-MM'
       tipo: C.tipos[r.tipo] ? r.tipo : 'expediente',
       inicio: U.deISO(r.inicio) ? r.inicio : '',
       termino: U.deISO(r.termino) ? r.termino : '',
@@ -94,7 +95,7 @@ P5.db = (function () {
     (g.semanas || []).forEach(function (s) {
       (s.policiais || []).forEach(function (p) {
         var r = sanitizar({
-          semana: s.numero, tipo: 'expediente', inicio: s.inicio, termino: s.termino, grad: p.grad, nome: p.nome,
+          tipo: 'expediente', inicio: s.inicio, termino: s.termino, grad: p.grad, nome: p.nome,
           observacoes: s.observacoes ? P5.rich.deTexto(s.observacoes) : '',
           criadoEm: g.criadoEm, atualizadoEm: g.atualizadoEm
         });
@@ -107,7 +108,6 @@ P5.db = (function () {
   /* ---------- Ordenação e agrupamento ---------- */
   function comparar(a, b) {
     if (a.inicio !== b.inicio) return a.inicio < b.inicio ? -1 : 1;
-    if (a.semana !== b.semana) return a.semana - b.semana;
     var ga = C.graduacoes.indexOf(a.grad), gb = C.graduacoes.indexOf(b.grad);
     if (ga !== gb) return gb - ga; // maior graduação primeiro
     return a.nome.localeCompare(b.nome, 'pt-BR');
@@ -116,8 +116,8 @@ P5.db = (function () {
   function agrupar(lista) {
     var grupos = [], mapa = {};
     lista.slice().sort(comparar).forEach(function (r) {
-      var k = r.semana + '|' + r.inicio + '|' + r.termino;
-      if (!mapa[k]) { mapa[k] = { chave: k, semana: r.semana, inicio: r.inicio, termino: r.termino, itens: [] }; grupos.push(mapa[k]); }
+      var k = r.mes + '|' + r.semana + '|' + r.inicio + '|' + r.termino;
+      if (!mapa[k]) { mapa[k] = { chave: k, mes: r.mes, semana: r.semana, inicio: r.inicio, termino: r.termino, itens: [] }; grupos.push(mapa[k]); }
       mapa[k].itens.push(r);
     });
     return grupos;
@@ -141,7 +141,7 @@ P5.db = (function () {
     grupos.forEach(function (g) {
       out.push('');
       out.push(linha('='));
-      out.push('  SEMANA ' + g.semana + '  •  ' + U.br(g.inicio) + ' (' + U.diaSemana(g.inicio) + ') a ' + U.br(g.termino) + ' (' + U.diaSemana(g.termino) + ')');
+      out.push('  S' + g.semana + ' • ' + g.semana + 'ª SEMANA DE ' + U.nomeMes(g.mes).toUpperCase() + '  •  ' + U.br(g.inicio) + ' (' + U.diaSemana(g.inicio) + ') a ' + U.br(g.termino) + ' (' + U.diaSemana(g.termino) + ')');
       out.push('  Efetivo: ' + g.itens.length + ' policial(is)');
       out.push(linha('='));
       g.itens.forEach(function (r) {
@@ -171,7 +171,7 @@ P5.db = (function () {
         var novos = Array.isArray(obj.semanas) ? migrarAntigo(obj) : [sanitizar(obj)];
         novos.forEach(function (r) {
           if (!r) { erros++; return; }
-          if (r.nome !== obj.nome || r.observacoes !== (obj.observacoes || '') || r.semana !== Number(obj.semana)) normalizados++;
+          if (r.nome !== obj.nome || r.observacoes !== (obj.observacoes || '') || r.semana !== Number(obj.semana) || r.mes !== obj.mes) normalizados++;
           if (vistos[r.id]) return;
           vistos[r.id] = 1;
           lista.push(r);
@@ -618,7 +618,7 @@ P5.db = (function () {
   }
 
   function descrever(r) {
-    return r.grad + ' ' + r.nome + ' (RG ' + r.rg + ') — Semana ' + r.semana + ', ' + U.br(r.inicio) + ' a ' + U.br(r.termino) + ', ' + C.tipos[r.tipo].label;
+    return r.grad + ' ' + r.nome + ' (RG ' + r.rg + ') — ' + U.rotuloSemana(r) + ', ' + U.br(r.inicio) + ' a ' + U.br(r.termino) + ', ' + C.tipos[r.tipo].label;
   }
 
   async function salvar(rec) {

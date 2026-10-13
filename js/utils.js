@@ -33,12 +33,22 @@ P5.util = (function () {
   }
   function domingoDaSemana(iso) { return somarDias(segundaDaSemana(iso), 6); }
 
-  /* Semana 1 ou 2 do ciclo quinzenal (âncora: P5.config.cicloInicio) */
-  function semanaDoCiclo(iso) {
-    var seg = segundaDaSemana(iso);
-    if (!seg) return 1;
-    var n = Math.round((deISO(seg) - deISO(segundaDaSemana(C.cicloInicio))) / 86400000 / 7);
-    return ((n % 2) + 2) % 2 === 0 ? 1 : 2;
+  /* Semana do mês (S1, S2, S3…): semanas de segunda a domingo contadas
+     dentro do mês da data; ao virar o mês, recomeça em S1. */
+  var MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  function semanaDoMes(iso) {
+    var d = deISO(iso);
+    if (!d) return 0;
+    var desloc = (new Date(d.getFullYear(), d.getMonth(), 1).getDay() + 6) % 7; // segunda = 0
+    return Math.ceil((d.getDate() + desloc) / 7);
+  }
+  function mesDe(iso) { return /^\d{4}-\d{2}/.test(iso || '') ? iso.slice(0, 7) : ''; }
+  function nomeMes(mes) { // 'AAAA-MM' -> 'outubro/2026'
+    if (!/^\d{4}-\d{2}$/.test(mes || '')) return '';
+    return MESES[Number(mes.slice(5, 7)) - 1] + '/' + mes.slice(0, 4);
+  }
+  function rotuloSemana(r) { // 'S3 • outubro/2026'
+    return 'S' + r.semana + ' • ' + nomeMes(r.mes);
   }
   function br(iso) {
     var d = deISO(iso);
@@ -128,8 +138,9 @@ P5.util = (function () {
     var t = C.tipos[chave] || C.tipos.expediente;
     return el('span', { class: 'badge ' + t.badge }, icone(t.icon), t.label);
   }
-  function badgeSemana(n) {
-    return el('span', { class: 'badge badge-semana' + n }, icone('i-calendar-week'), 'Semana ' + n);
+  function badgeSemana(r) {
+    return el('span', { class: 'badge badge-semana' + (r.semana % 2 ? 1 : 2), title: r.semana + 'ª semana de ' + nomeMes(r.mes) },
+      icone('i-calendar-week'), rotuloSemana(r));
   }
 
   return {
@@ -137,6 +148,7 @@ P5.util = (function () {
     diaSemana: diaSemana, diaCurto: diaCurto, ehDomingo: ehDomingo, diasEntre: diasEntre, dataHoraBR: dataHoraBR,
     normalizar: normalizar, limpar: limpar, uid: uid, nomeCompleto: nomeCompleto,
     icone: icone, el: el, esvaziar: esvaziar, situacao: situacao, badgeSituacao: badgeSituacao, badgeSemana: badgeSemana, badgeTipo: badgeTipo,
-    segundaDaSemana: segundaDaSemana, domingoDaSemana: domingoDaSemana, semanaDoCiclo: semanaDoCiclo
+    segundaDaSemana: segundaDaSemana, domingoDaSemana: domingoDaSemana,
+    semanaDoMes: semanaDoMes, mesDe: mesDe, nomeMes: nomeMes, rotuloSemana: rotuloSemana
   };
 })();

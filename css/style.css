@@ -2439,3 +2439,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .passo code {
   white-space: nowrap;
 }
+
+/* Filtros de mês e semana do mês */
+.input-mes {
+  min-width: 170px;
+}
+.input-mes select {
+  min-height: 36px;
+}
+#r-semana-calc {
+  margin-left: 0.4rem;
+  text-transform: none;
+}
+
+/* Modo de usar: texto justificado (com hifenização em português) */
+.passo .texto,
+.passo .hint {
+  text-align: justify;
+  text-justify: inter-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}

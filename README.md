@@ -47,7 +47,7 @@ A mesma pasta funciona nos dois ambientes sem nenhuma alteração.
 
 | Campo | Tipo | Observação |
 | --- | --- | --- |
-| **Semana** | Controle segmentado | **Calculada pelas datas** (ciclo quinzenal). Clicar em Semana 1 ou 2 leva as datas para a próxima semana daquele tipo |
+| **Semana** | Atalhos + cálculo automático | **Semana do mês** (S1, S2, S3…), calculada pela Data Início e exibida ao lado do título (ex.: `S4 • outubro/2026`). Os atalhos **Esta semana / Próxima / Seguinte** preenchem as datas |
 | **Tipo de escala** | Select | Carga horária (Expediente, **12 horas**, **24 horas**, **48 horas**) ou situação (Feriado, Troca, Sobreaviso, Ponto facultativo, Folga) |
 | **Data Início** | Calendário | Só aceita **de hoje em diante**. Ao mudar, a Semana se ajusta sozinha |
 | **Data Término** | Calendário | Preenchida com o **domingo** da semana. Nunca antes da Data Início nem depois do domingo |
@@ -58,18 +58,23 @@ A mesma pasta funciona nos dois ambientes sem nenhuma alteração.
 
 **Tudo em MAIÚSCULAS.** Os dados são convertidos para maiúsculas durante a digitação, ao colar, ao salvar e ao editar. Se alguém escrever em minúsculas direto no `db.txt`, o sistema normaliza o conteúdo e regrava o arquivo em maiúsculas. As credenciais de login são a exceção: não passam por essa conversão.
 
-**Ciclo das semanas.** A escala alterna Semana 1 e Semana 2, de segunda a domingo, a partir de uma data de referência (`cicloInicio` em `js/config.js`, hoje 12/10/2026):
+**Semanas do mês.** Cada mês tem as suas semanas, de segunda a domingo: **S1, S2, S3, S4** (e **S5** ou **S6**, quando o mês tiver). Quando o mês acaba, a contagem recomeça em S1. A semana é definida pela **Data Início** do lançamento:
 
-| Semana 1 | Semana 2 |
+| Data Início | Semana |
 | --- | --- |
-| 12/10 a 18/10/2026 | 19/10 a 25/10/2026 |
-| 26/10 a 01/11/2026 | 02/11 a 08/11/2026 |
+| 01/10/2026 (quinta) a 04/10 | S1 • outubro/2026 |
+| 13/10/2026 | S3 • outubro/2026 |
+| 19/10/2026 | S4 • outubro/2026 |
+| 26/10/2026 | S5 • outubro/2026 |
+| 02/11/2026 | S2 • novembro/2026 (a S1 de novembro é só o domingo, 01/11) |
+
+Na tabela e nas Consultas, escolha o **mês** e a semana (**Todas, S1, S2…**): o filtro nunca mistura semanas de meses diferentes.
 
 Cada lançamento fica dentro de **uma única semana**. Se alguém gravar um lançamento com a semana incoerente com as datas (por exemplo, editando o `db.txt`), o sistema corrige sozinho.
 
 Para digitar o mínimo:
 
-- Depois de **Incluir**, o formulário mantém semana, datas e tipo, para lançar o próximo policial do mesmo período.
+- Depois de **Incluir**, o formulário mantém as datas e o tipo, para lançar o próximo policial da mesma semana.
 - No painel, o botão **Lançar neste período** já preenche semana e datas (só aparece em períodos futuros).
 
 ---
@@ -89,7 +94,7 @@ suzano-p5/
 │   └── style.css           # Todo o CSS: temas, layout, animações, responsivo e impressão A4
 ├── js/
 │   ├── theme.js            # Tema claro/escuro (carregado no <head>, sem "piscar")
-│   ├── config.js           # Hashes, token cifrado, repositório, ciclo das semanas, graduações, tipos, horário
+│   ├── config.js           # Hashes, token cifrado, repositório, graduações, tipos, horário
 │   ├── utils.js            # Datas, texto, badges e criação segura de elementos
 │   ├── editor.js           # Editor de texto rico + sanitizador por lista branca
 │   ├── auth.js             # Login, sessão, inatividade e logout
@@ -161,7 +166,7 @@ Depois, faça commit e push para valer também no GitHub Pages.
 ## Modo de usar
 
 1. **Entre** com o usuário e a senha da seção.
-2. Em **Lançamentos**, escolha a **Semana** e o **Tipo de escala**, e confira as datas sugeridas.
+2. Em **Lançamentos**, use os atalhos **Esta semana / Próxima / Seguinte** (ou escolha as datas) e o **Tipo de escala**. A semana do mês (ex.: `S4 • outubro/2026`) aparece calculada.
 3. Selecione a **Graduação** e informe o **RG Militar** e o **Nome Farda**. Escreva as **Observações**, se houver.
 4. Clique em **Incluir**. O lançamento é gravado **na hora** no `db.txt`, e um aviso (toast) confirma a gravação. No Pages, se a gravação automática ainda não estiver ativada, na primeira vez abre a janela **Conectar ao GitHub** para colar o token (veja [Gravação pelo GitHub Pages](#gravação-pelo-github-pages-token)).
 5. Para **alterar**, clique no lápis na tabela: o lançamento sobe para o formulário. Clique em **Salvar alterações**.
@@ -253,7 +258,7 @@ Os registros ficam agrupados por **semana e período**. Cada registro tem uma pa
 ########################################################################
 
 ========================================================================
-  SEMANA 2  •  19/10/2026 (Segunda-feira) a 25/10/2026 (Domingo)
+  S4 • 4ª SEMANA DE OUTUBRO/2026  •  19/10/2026 (Segunda-feira) a 25/10/2026 (Domingo)
   Efetivo: 2 policial(is)
 ========================================================================
 
@@ -261,7 +266,7 @@ Os registros ficam agrupados por **semana e período**. Cada registro tem uma pa
           ID: e-…   |   Criado: 13/10/2026 14:01   |   Atualizado: 13/10/2026 14:01
           Observações:
             COBRIR EVENTO URGENTE
-@registro {"id":"e-…","semana":2,"tipo":"expediente","inicio":"2026-10-19",…}
+@registro {"id":"e-…","semana":4,"mes":"2026-10","tipo":"expediente","inicio":"2026-10-19",…}
   ----------------------------------------------------------------------
 ```
 
@@ -282,14 +287,14 @@ Os registros ficam agrupados por **semana e período**. Cada registro tem uma pa
 
 ## Regras de integridade (datas)
 
-Para garantir **segurança e transparência**, a escala não pode ser alterada retroativamente e segue o ciclo das semanas:
+Para garantir **segurança e transparência**, a escala não pode ser alterada retroativamente e cada lançamento pertence a uma semana do mês:
 
 | Regra | Onde é aplicada |
 | --- | --- |
 | Os calendários só permitem datas **de hoje em diante** | Interface (`min` dos campos de data) |
 | A Data Término nunca fica antes da Data Início | Interface e validação |
 | Cada lançamento fica dentro de **uma única semana** (segunda a domingo) | Interface e camada de dados |
-| A **Semana** (1 ou 2) é **calculada pelas datas**, nunca escolhida à mão | Interface e camada de dados, inclusive na leitura do `db.txt` |
+| A **semana do mês** (S1, S2…) é **calculada pela Data Início**, nunca escolhida à mão | Interface e camada de dados, inclusive na leitura do `db.txt` |
 | Lançar ou alterar com data anterior a hoje é **recusado** | Validação do formulário **e** camada de dados (`db.js`), inclusive se alguém tentar pelo console do navegador |
 | Lançamento cujo período **já começou** fica **bloqueado** (cadeado): não pode ser editado nem excluído | Interface e camada de dados |
 | Lançamentos bloqueados continuam visíveis e imprimíveis | Consultas e relatórios |
@@ -406,7 +411,6 @@ Tudo fica em [`js/config.js`](js/config.js):
 | Graduações | `graduacoes` |
 | Tipos de escala (rótulo, grupo, ícone, cor) | `tipos` |
 | Horário exibido no painel e nos relatórios | `horario` |
-| Início do ciclo Semana 1 / Semana 2 | `cicloInicio` |
 | Repositório e branch onde o `db.txt` é gravado pelo Pages | `github` |
 | Tempo de sessão e de inatividade | `sessionHours`, `idleMinutes` |
 | Tentativas e tempo de bloqueio | `maxAttempts`, `lockSeconds` |

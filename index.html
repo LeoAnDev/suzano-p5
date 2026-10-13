@@ -572,17 +572,23 @@
                   <svg class="icon" aria-hidden="true">
                     <use href="#i-calendar-week" />
                   </svg>
-                  Semana <span class="req" aria-hidden="true">*</span>
+                  Semana
+                  <span class="badge badge-semana1" id="r-semana-calc" aria-live="polite">—</span>
                 </legend>
-                <div class="segmentado" role="radiogroup">
+                <div class="segmentado" role="radiogroup" aria-label="Atalhos de semana">
                   <label class="segmento"
-                    ><input type="radio" name="semana" value="1" checked /><span
-                      >Semana 1</span
+                    ><input type="radio" name="atalho-semana" value="0" checked /><span
+                      >Esta semana</span
                     ></label
                   >
                   <label class="segmento"
-                    ><input type="radio" name="semana" value="2" /><span
-                      >Semana 2</span
+                    ><input type="radio" name="atalho-semana" value="1" /><span
+                      >Próxima</span
+                    ></label
+                  >
+                  <label class="segmento"
+                    ><input type="radio" name="atalho-semana" value="2" /><span
+                      >Seguinte</span
                     ></label
                   >
                 </div>
@@ -883,30 +889,20 @@
                       autocomplete="off"
                     />
                   </div>
+                  <div class="input-icon input-mes">
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#i-calendar" />
+                    </svg>
+                    <select id="t-mes" aria-label="Filtrar por mês">
+                      <option value="">Todos os meses</option>
+                    </select>
+                  </div>
                   <div
                     class="segmentado segmentado-sm"
                     role="radiogroup"
-                    aria-label="Filtrar por semana"
-                  >
-                    <label class="segmento"
-                      ><input
-                        type="radio"
-                        name="t-semana"
-                        value=""
-                        checked
-                      /><span>Todas</span></label
-                    >
-                    <label class="segmento"
-                      ><input type="radio" name="t-semana" value="1" /><span
-                        >S1</span
-                      ></label
-                    >
-                    <label class="segmento"
-                      ><input type="radio" name="t-semana" value="2" /><span
-                        >S2</span
-                      ></label
-                    >
-                  </div>
+                    aria-label="Filtrar por semana do mês"
+                    id="t-semanas"
+                  ></div>
                 </div>
               </header>
               <div id="tabela-escala" aria-live="polite"></div>
@@ -957,15 +953,30 @@
                 </div>
               </div>
               <div class="field">
-                <label class="field-label" for="f-semana">Semana</label>
+                <label class="field-label" for="f-mes">Mês</label>
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-calendar" />
+                  </svg>
+                  <select id="f-mes" name="mes">
+                    <option value="">Todos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="f-semana">Semana do mês</label>
                 <div class="input-icon">
                   <svg class="icon" aria-hidden="true">
                     <use href="#i-calendar-week" />
                   </svg>
                   <select id="f-semana" name="semana">
                     <option value="">Todas</option>
-                    <option value="1">Semana 1</option>
-                    <option value="2">Semana 2</option>
+                    <option value="1">S1</option>
+                    <option value="2">S2</option>
+                    <option value="3">S3</option>
+                    <option value="4">S4</option>
+                    <option value="5">S5</option>
+                    <option value="6">S6</option>
                   </select>
                 </div>
               </div>
@@ -1221,15 +1232,16 @@
                   Inclua um lançamento
                 </h3>
                 <p class="texto">
-                  Em <strong>Lançamentos</strong>, escolha a
-                  <strong>Semana</strong> e o
+                  Em <strong>Lançamentos</strong>, use os atalhos
+                  <strong>Esta semana</strong>, <strong>Próxima</strong> ou
+                  <strong>Seguinte</strong> (ou escolha as datas; os
+                  calendários só aceitam de hoje em diante) e o
                   <strong>Tipo de escala</strong> (Expediente, 12, 24 ou 48
                   horas, Feriado, Troca, Sobreaviso, Ponto facultativo ou
-                  Folga). As datas vão sozinhas para a próxima semana daquele
-                  tipo, até o domingo; os calendários só aceitam datas de hoje
-                  em diante, e ao mudar a Data Início a Semana se ajusta
-                  sozinha (o ciclo alterna Semana 1 e Semana 2, de segunda a
-                  domingo). Depois selecione a
+                  Folga). A <strong>semana do mês</strong> aparece calculada
+                  ao lado do título (ex.: <strong>S4 • outubro/2026</strong>):
+                  cada mês tem S1, S2, S3, S4… e, ao virar o mês, recomeça em
+                  S1. Depois selecione a
                   <strong>Graduação</strong>, informe o
                   <strong>RG Militar</strong> e o
                   <strong>Nome Farda</strong> (um RG já usado preenche o resto
@@ -1244,8 +1256,8 @@
                   Regras: tudo é gravado em <strong>MAIÚSCULAS</strong>; o RG
                   Militar tem <strong>5 a 6 dígitos</strong>; cada lançamento
                   fica dentro de <strong>uma única semana</strong> (segunda a
-                  domingo). Depois de incluir, semana, datas e tipo continuam
-                  preenchidos para lançar o próximo policial.
+                  domingo). Depois de incluir, as datas e o tipo continuam
+                  preenchidos para lançar o próximo policial da mesma semana.
                 </p>
               </div>
             </li>

@@ -290,6 +290,7 @@
   function aoMudarBanco(est) {
     atualizarStatusDb(est);
     atualizarNomes();
+    popularMeses();
     popularFiltros();
     renderPainel();
     renderTabela();
@@ -433,13 +434,13 @@
         el('p', { text: opcoes.textoVazio || 'Use o formulário para incluir o primeiro lançamento.' }));
     }
 
-    var grupos = P5.db.agrupar(lista).reverse(); // mais recentes primeiro
+    var grupos = P5.db.agrupar(lista); // ordem cronológica: S1, S2, S3… de cada mês
     var tbody = el('tbody');
     grupos.forEach(function (g) {
       tbody.appendChild(el('tr', { class: 'linha-grupo' },
         el('th', { colspan: '6', scope: 'colgroup' },
           el('div', { class: 'grupo-info' },
-            U.badgeSemana(g.semana),
+            U.badgeSemana(g),
             el('span', { class: 'grupo-periodo' }, U.icone('i-calendar'), U.br(g.inicio) + ' a ' + U.br(g.termino)),
             el('span', { class: 'grupo-dias', text: U.diaCurto(g.inicio) + '–' + U.diaCurto(g.termino) + ' • ' + g.itens.length + ' policial(is)' }),
             U.badgeSituacao(g)
@@ -449,7 +450,7 @@
       g.itens.forEach(function (r) {
         var acoes = el('div', { class: 'acoes' },
           opcoes.imprimir ? botaoAcao('i-printer', 'Imprimir lançamento de ' + r.nome, '', function () {
-            P5.report.imprimir({ titulo: r.grad + ' ' + r.nome + ' — Semana ' + r.semana, filtros: ['Lançamento individual'], registros: [r] });
+            P5.report.imprimir({ titulo: r.grad + ' ' + r.nome + ' — ' + U.rotuloSemana(r), filtros: ['Lançamento individual'], registros: [r] });
           }) : null,
           P5.db.bloqueado(r)
             ? el('span', { class: 'cadeado', title: 'Período já iniciado: bloqueado para alteração e exclusão', 'aria-label': 'Bloqueado: período já iniciado' }, U.icone('i-lock'))
@@ -551,7 +552,7 @@
       el('span', { class: 'badge badge-hero' }, U.icone(sit.icone), sit.rotulo),
       el('h3', { class: 'escala-titulo', text: 'ESCALA' }),
       el('p', { class: 'escala-sub', text: 'P5 • Comunicação Social • 29º BPM' }),
-      el('p', { class: 'escala-periodo' }, U.icone('i-calendar-week'), 'SEMANA ' + g.semana + ': ' + U.br(g.inicio) + ' A ' + U.br(g.termino))
+      el('p', { class: 'escala-periodo' }, U.icone('i-calendar-week'), 'S' + g.semana + ' DE ' + U.nomeMes(g.mes).toUpperCase() + ': ' + U.br(g.inicio) + ' A ' + U.br(g.termino))
     ));
 
     alvo.appendChild(el('div', { class: 'card horario' },
@@ -574,10 +575,10 @@
 
     alvo.appendChild(el('div', { class: 'btn-group btn-group-center' },
       el('button', { type: 'button', class: 'btn btn-primary', on: { click: function () {
-        P5.report.imprimir({ titulo: 'Semana ' + g.semana + ' — ' + U.br(g.inicio) + ' a ' + U.br(g.termino), filtros: ['Período individual'], registros: g.itens });
+        P5.report.imprimir({ titulo: U.rotuloSemana(g) + ' — ' + U.br(g.inicio) + ' a ' + U.br(g.termino), filtros: ['Período individual'], registros: g.itens });
       } } }, U.icone('i-printer'), 'Imprimir PDF deste período'),
       g.inicio < U.hojeISO() ? null : el('button', { type: 'button', class: 'btn btn-outline', on: { click: function () {
-        novoFormulario({ semana: g.semana, inicio: g.inicio, termino: g.termino });
+        novoFormulario({ inicio: g.inicio, termino: g.termino });
         irPara('lancar');
         $('#r-grad').focus();
       } } }, U.icone('i-user-plus'), 'Lançar neste período')
@@ -592,14 +593,6 @@
   var destaqueId = null;
   var dataAutomatica = true;
 
-  /* Próxima segunda-feira a partir de hoje (hoje, se for segunda) — nunca no passado */
-  function proximaSegunda(offsetSemanas) {
-    var d = new Date();
-    var dia = d.getDay();
-    d.setDate(d.getDate() + (dia === 1 ? 0 : (8 - dia) % 7) + 7 * offsetSemanas);
-    return U.paraISO(d);
-  }
-
   /* Calendários: só permitem de hoje em diante */
   function aplicarMinimos() {
     var hoje = U.hojeISO();
@@ -609,15 +602,29 @@
     $('#r-termino').max = ini.value ? U.domingoDaSemana(ini.value) : '';
   }
 
-  function semanaSelecionada() { return Number($('input[name="semana"]:checked', form).value); }
-  function definirSemana(n) { $('input[name="semana"][value="' + n + '"]', form).checked = true; }
+  function atalhoSelecionado() { var r = $('input[name="atalho-semana"]:checked', form); return r ? Number(r.value) : 0; }
+  function definirAtalho(n) {
+    $$('input[name="atalho-semana"]', form).forEach(function (r) { r.checked = Number(r.value) === n; });
+  }
+  /* Marca o atalho correspondente às datas (ou nenhum, se for outra semana) */
+  function sincronizarAtalho(ini) {
+    var dif = ini ? Math.round(U.diasEntre(U.segundaDaSemana(U.hojeISO()), U.segundaDaSemana(ini)) / 7) : -1;
+    definirAtalho(dif);
+  }
+  function atualizarSemanaCalculada() {
+    var ini = $('#r-inicio').value, chip = $('#r-semana-calc');
+    if (!U.deISO(ini)) { chip.textContent = '—'; return; }
+    var r = { semana: U.semanaDoMes(ini), mes: U.mesDe(ini) };
+    chip.textContent = U.rotuloSemana(r);
+    chip.className = 'badge badge-semana' + (r.semana % 2 ? 1 : 2);
+    chip.title = r.semana + 'ª semana de ' + U.nomeMes(r.mes);
+  }
 
-  /* Próxima semana do tipo escolhido (1 ou 2) a partir de hoje.
-     Se a semana atual for desse tipo, começa hoje; termina no domingo. */
+  /* Atalho: esta semana (a partir de hoje), a próxima ou a seguinte; até domingo */
   function sugerirDatas() {
     var hoje = U.hojeISO();
-    var seg = U.segundaDaSemana(hoje);
-    var ini = U.semanaDoCiclo(hoje) === semanaSelecionada() ? hoje : U.somarDias(seg, 7);
+    var n = atalhoSelecionado();
+    var ini = n === 0 ? hoje : U.somarDias(U.segundaDaSemana(hoje), 7 * n);
     $('#r-inicio').value = ini;
     $('#r-termino').value = U.domingoDaSemana(ini);
     dataAutomatica = true;
@@ -626,6 +633,7 @@
 
   function atualizarPeriodo() {
     aplicarMinimos();
+    atualizarSemanaCalculada();
     var ini = $('#r-inicio').value, fim = $('#r-termino').value;
     var hint = U.esvaziar($('#r-periodo'));
     if (!ini || !fim) return;
@@ -635,7 +643,7 @@
     hint.className = 'hint hint-periodo';
     hint.appendChild(U.icone('i-info'));
     if (fim > U.domingoDaSemana(ini)) { hint.className = 'hint hint-periodo hint-erro'; hint.appendChild(U.icone('i-alert')); hint.appendChild(document.createTextNode('O lançamento deve terminar até domingo, ' + U.br(U.domingoDaSemana(ini)) + '.')); return; }
-    hint.appendChild(document.createTextNode('Semana ' + U.semanaDoCiclo(ini) + ' • ' + dias + ' dia(s) • ' + U.diaSemana(ini) + ' a ' + U.diaSemana(fim)));
+    hint.appendChild(document.createTextNode(U.semanaDoMes(ini) + 'ª semana de ' + U.nomeMes(U.mesDe(ini)) + ' • ' + dias + ' dia(s) • ' + U.diaSemana(ini) + ' a ' + U.diaSemana(fim)));
   }
 
   function atualizarIconeTipo() {
@@ -662,12 +670,11 @@
     $('#r-nome').value = '';
     editor.limpar();
     if (manter) {
-      if (manter.semana) definirSemana(manter.semana);
       if (manter.tipo) $('#r-tipo').value = manter.tipo;
       if (manter.inicio) { $('#r-inicio').value = manter.inicio; $('#r-termino').value = manter.termino; dataAutomatica = false; atualizarPeriodo(); }
       else sugerirDatas();
     } else {
-      definirSemana(1);
+      definirAtalho(0);
       $('#r-tipo').value = 'expediente';
       sugerirDatas();
     }
@@ -681,7 +688,7 @@
     if (P5.db.bloqueado(r)) { toast('Este lançamento já começou e está bloqueado para alterações.', 'aviso'); return; }
     editandoId = id;
     limparErros();
-    definirSemana(r.semana);
+    sincronizarAtalho(r.inicio);
     $('#r-tipo').value = r.tipo;
     $('#r-inicio').value = r.inicio;
     $('#r-termino').value = r.termino;
@@ -705,7 +712,7 @@
     if (!r) return;
     if (P5.db.bloqueado(r)) { toast('Este lançamento já começou e não pode ser excluído.', 'aviso'); return; }
     var ok = await confirmar('Excluir lançamento?',
-      r.grad + ' ' + r.nome + ' — Semana ' + r.semana + ' (' + U.br(r.inicio) + ' a ' + U.br(r.termino) + '). O registro será removido do db.txt. Esta ação não pode ser desfeita.', 'Excluir');
+      r.grad + ' ' + r.nome + ' — ' + U.rotuloSemana(r) + ' (' + U.br(r.inicio) + ' a ' + U.br(r.termino) + '). O registro será removido do db.txt. Esta ação não pode ser desfeita.', 'Excluir');
     if (!ok) return;
     await prepararArquivo();
     var linha = $('tr[data-id="' + id + '"]');
@@ -718,14 +725,14 @@
   }
 
   /* ---------- Eventos do formulário ---------- */
-  $$('input[name="semana"]', form).forEach(function (r) {
+  $$('input[name="atalho-semana"]', form).forEach(function (r) {
     r.addEventListener('change', function () { sugerirDatas(); });
   });
   $('#r-inicio').addEventListener('change', function () {
     dataAutomatica = false;
     var ini = this.value, fim = $('#r-termino').value;
     if (ini) {
-      definirSemana(U.semanaDoCiclo(ini));
+      sincronizarAtalho(ini);
       if (!fim || fim < ini || fim > U.domingoDaSemana(ini)) $('#r-termino').value = U.domingoDaSemana(ini);
     }
     atualizarPeriodo();
@@ -773,7 +780,8 @@
   function lerFormulario() {
     return {
       id: editandoId || U.uid('e'),
-      semana: U.semanaDoCiclo($('#r-inicio').value) || semanaSelecionada(),
+      semana: U.semanaDoMes($('#r-inicio').value),
+      mes: U.mesDe($('#r-inicio').value),
       tipo: $('#r-tipo').value,
       inicio: $('#r-inicio').value,
       termino: $('#r-termino').value,
@@ -824,7 +832,7 @@
 
     var conflito = P5.db.conflito(r);
     if (conflito && !(await confirmar('Período sobreposto',
-      conflito.grad + ' ' + conflito.nome + ' já tem lançamento de ' + U.br(conflito.inicio) + ' a ' + U.br(conflito.termino) + ' (Semana ' + conflito.semana + '). Deseja salvar mesmo assim?', 'Salvar mesmo assim', false))) return;
+      conflito.grad + ' ' + conflito.nome + ' já tem lançamento de ' + U.br(conflito.inicio) + ' a ' + U.br(conflito.termino) + ' (' + U.rotuloSemana(conflito) + '). Deseja salvar mesmo assim?', 'Salvar mesmo assim', false))) return;
 
     var btn = $('#btn-salvar');
     btn.disabled = true;
@@ -834,7 +842,7 @@
       setTimeout(function () { destaqueId = null; }, 2500);
       if (res.novo) {
         // mantém semana, datas e tipo para lançar o próximo policial com o mínimo de digitação
-        novoFormulario({ semana: r.semana, inicio: r.inicio, termino: r.termino, tipo: r.tipo });
+        novoFormulario({ inicio: r.inicio, termino: r.termino, tipo: r.tipo });
         $('#r-grad').focus();
       } else {
         novoFormulario();
@@ -850,9 +858,11 @@
   /* ---------- Tabela ao lado do formulário ---------- */
   function renderTabela() {
     var busca = U.normalizar($('#t-busca').value);
+    var mes = $('#t-mes').value;
     var semana = ($('input[name="t-semana"]:checked') || {}).value || '';
     var todos = P5.db.todos();
     var lista = todos.filter(function (r) {
+      if (mes && r.mes !== mes) return false;
       if (semana && String(r.semana) !== semana) return false;
       if (busca && U.normalizar(r.grad + ' ' + r.rg + ' ' + r.nome + ' ' + C.tipos[r.tipo].label).indexOf(busca) === -1) return false;
       return true;
@@ -861,11 +871,35 @@
     var alvo = U.esvaziar($('#tabela-escala'));
     alvo.appendChild(tabelaRegistros(lista, {
       tituloVazio: todos.length ? 'Nada encontrado' : 'Nenhum lançamento',
-      textoVazio: todos.length ? 'Ajuste a busca ou o filtro de semana.' : 'Use o formulário para incluir o primeiro lançamento.'
+      textoVazio: todos.length ? 'Ajuste a busca ou os filtros de mês e semana.' : 'Use o formulário para incluir o primeiro lançamento.'
     }));
   }
   $('#t-busca').addEventListener('input', renderTabela);
-  $$('input[name="t-semana"]').forEach(function (r) { r.addEventListener('change', renderTabela); });
+  $('#t-mes').addEventListener('change', renderTabela);
+  $('#t-semanas').addEventListener('change', renderTabela);
+
+  /* Meses presentes nos lançamentos (selects de mês da tabela e das consultas) */
+  function popularMeses() {
+    var meses = [];
+    P5.db.todos().forEach(function (r) { if (r.mes && meses.indexOf(r.mes) === -1) meses.push(r.mes); });
+    meses.sort();
+    ['#t-mes', '#f-mes'].forEach(function (sel) {
+      var s = $(sel), atual = s.value;
+      while (s.options.length > 1) s.remove(1);
+      meses.forEach(function (m) { s.appendChild(el('option', { value: m, text: U.nomeMes(m) })); });
+      s.value = meses.indexOf(atual) !== -1 ? atual : '';
+    });
+    // filtro S1…S5 (S6 só se existir algum lançamento nela)
+    var cont = $('#t-semanas');
+    var marcado = ($('input[name="t-semana"]:checked') || {}).value || '';
+    var max = Math.max(5, Math.max.apply(null, [0].concat(P5.db.todos().map(function (r) { return r.semana; }))));
+    U.esvaziar(cont);
+    [''].concat(Array.from({ length: max }, function (_, i) { return String(i + 1); })).forEach(function (v) {
+      cont.appendChild(el('label', { class: 'segmento' },
+        el('input', { type: 'radio', name: 't-semana', value: v, checked: v === marcado }),
+        el('span', { text: v ? 'S' + v : 'Todas' })));
+    });
+  }
 
   function atualizarNomes() {
     var vistos = {}, vistosRg = {};
@@ -896,14 +930,15 @@
   }
 
   function lerFiltros() {
-    return { de: $('#f-de').value, ate: $('#f-ate').value, semana: $('#f-semana').value, tipo: $('#f-tipo').value, policial: $('#f-policial').value, grad: $('#f-grad').value };
+    return { de: $('#f-de').value, ate: $('#f-ate').value, mes: $('#f-mes').value, semana: $('#f-semana').value, tipo: $('#f-tipo').value, policial: $('#f-policial').value, grad: $('#f-grad').value };
   }
 
   function descreverFiltros(f) {
     var d = [];
     if (f.de) d.push('De ' + U.br(f.de));
     if (f.ate) d.push('Até ' + U.br(f.ate));
-    if (f.semana) d.push('Semana ' + f.semana);
+    if (f.mes) d.push('Mês: ' + U.nomeMes(f.mes));
+    if (f.semana) d.push('S' + f.semana);
     if (f.tipo) d.push('Tipo: ' + C.tipos[f.tipo].label);
     if (f.policial) d.push('Policial: ' + $('#f-policial').selectedOptions[0].textContent);
     if (f.grad) d.push('Graduação: ' + f.grad);
@@ -914,6 +949,7 @@
     return P5.db.todos().filter(function (r) {
       if (f.de && r.termino < f.de) return false;
       if (f.ate && r.inicio > f.ate) return false;
+      if (f.mes && r.mes !== f.mes) return false;
       if (f.semana && String(r.semana) !== f.semana) return false;
       if (f.tipo && r.tipo !== f.tipo) return false;
       if (f.policial && U.normalizar(r.nome) !== f.policial) return false;

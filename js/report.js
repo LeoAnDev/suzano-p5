@@ -49,7 +49,7 @@ P5.report = (function () {
   function blocoGrupo(g) {
     return el('section', { class: 'pr-semana' },
       el('div', { class: 'pr-semana-head' },
-        el('h3', { text: 'SEMANA ' + g.semana + ' — ' + U.br(g.inicio) + ' a ' + U.br(g.termino) }),
+        el('h3', { text: 'S' + g.semana + ' — ' + g.semana + 'ª SEMANA DE ' + U.nomeMes(g.mes).toUpperCase() + ' — ' + U.br(g.inicio) + ' a ' + U.br(g.termino) }),
         el('span', { text: U.diaSemana(g.inicio) + ' a ' + U.diaSemana(g.termino) + '  •  ' + C.horario.dias + ', ' + C.horario.inicio + ' às ' + C.horario.fim })
       ),
       el('table', { class: 'pr-tabela' },
