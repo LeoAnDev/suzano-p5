@@ -88,7 +88,7 @@ async function verificarToken(token) {
 
   const r = await fetch(base + '/git/ref/heads/main', { headers: h });
   if (r.status === 401) throw new Error('Token inválido ou expirado. Gere outro no GitHub.');
-  if (r.status === 404 || r.status === 403) throw new Error('O token NÃO tem acesso ao repositório ' + DONO + '/' + REPO + '. No GitHub, edite o token → Repository access → "Only select repositories" → escolha suzano-p5 → Update.');
+  if (r.status === 404 || r.status === 403) throw new Error('O token NÃO tem acesso ao repositório ' + DONO + '/' + REPO + '. No GitHub, edite o token → Repository access → "Only select repositories" → escolha ' + REPO + ' → Update.');
   if (!r.ok) throw new Error('GitHub respondeu ' + r.status + ' na leitura.');
   console.log('    ✔ Leitura do repositório: OK');
   const sha = (await r.json()).object.sha;
