@@ -1,0 +1,8 @@
+########################################################################
+#  DB-LOCAL-TXT • ESCALA P5 • COMUNICAÇÃO SOCIAL • 29º BPM
+#  Cada registro tem um bloco legível e uma linha "@registro" (JSON),
+#  que é a parte lida pelo sistema. Não altere a estrutura dessa linha.
+#  Atualizado em: 13/10/2026 00:00   |   Registros: 0   |   Períodos: 0
+########################################################################
+
+# FIM DO ARQUIVO

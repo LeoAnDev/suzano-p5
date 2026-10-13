@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Escala P5: iniciar servidor local",
+      "type": "shell",
+      "command": "node servidor.js",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "options": {
+        "env": {
+          "NO_OPEN": "1"
+        }
+      }
+    }
+  ]
+}

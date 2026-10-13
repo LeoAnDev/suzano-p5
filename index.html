@@ -1,0 +1,1353 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' http://127.0.0.1:5510; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta
+      name="description"
+      content="Escala semanal da P5 – Comunicação Social do 29º BPM."
+    />
+    <meta name="theme-color" content="#081d42" />
+
+    <title>Escala P5 • 29º BPM</title>
+
+    <link rel="icon" href="images/Logo29.PNG" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/theme.js"></script>
+  </head>
+
+  <body>
+    <!-- ================================================================
+     ÍCONES (sprite SVG)
+     ================================================================ -->
+    <svg
+      class="sprite"
+      aria-hidden="true"
+      focusable="false"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <symbol id="i-user" viewBox="0 0 24 24">
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24">
+        <rect width="18" height="11" x="3" y="11" rx="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+        <circle cx="12" cy="12" r="3" />
+      </symbol>
+      <symbol id="i-eye-off" viewBox="0 0 24 24">
+        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+        <path
+          d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
+        />
+        <path
+          d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
+        />
+        <path d="M2 2l20 20" />
+      </symbol>
+      <symbol id="i-login" viewBox="0 0 24 24">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+        <path d="m10 17 5-5-5-5" />
+        <path d="M15 12H3" />
+      </symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <path d="m16 17 5-5-5-5" />
+        <path d="M21 12H9" />
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4" />
+        <path
+          d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+        />
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+      </symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24">
+        <rect width="18" height="18" x="3" y="4" rx="2" />
+        <path d="M16 2v4M8 2v4M3 10h18" />
+      </symbol>
+      <symbol id="i-calendar-week" viewBox="0 0 24 24">
+        <rect width="18" height="18" x="3" y="4" rx="2" />
+        <path d="M16 2v4M8 2v4M3 10h18M7 14h10M7 18h6" />
+      </symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 6v6l4 2" />
+      </symbol>
+      <symbol id="i-users" viewBox="0 0 24 24">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+      </symbol>
+      <symbol id="i-user-plus" viewBox="0 0 24 24">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M19 8v6M22 11h-6" />
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </symbol>
+      <symbol id="i-rank" viewBox="0 0 24 24">
+        <path d="m7 11 5-5 5 5M7 17l5-5 5 5" />
+      </symbol>
+      <symbol id="i-badge" viewBox="0 0 24 24">
+        <rect width="16" height="20" x="4" y="2" rx="2" />
+        <path d="M9 7h6" />
+        <circle cx="12" cy="12" r="2.5" />
+        <path d="M8 18a4 4 0 0 1 8 0" />
+      </symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24">
+        <path
+          d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"
+        />
+      </symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24">
+        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+      </symbol>
+      <symbol id="i-save" viewBox="0 0 24 24">
+        <path
+          d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+        />
+        <path d="M17 21v-8H7v8M7 3v5h8" />
+      </symbol>
+      <symbol id="i-printer" viewBox="0 0 24 24">
+        <path d="M6 9V2h12v7" />
+        <path
+          d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+        />
+        <rect width="12" height="8" x="6" y="14" />
+      </symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24">
+        <path d="M18 6 6 18M6 6l12 12" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" />
+      </symbol>
+      <symbol id="i-database" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="5" rx="9" ry="3" />
+        <path d="M3 5v14a9 3 0 0 0 18 0V5" />
+        <path d="M3 12a9 3 0 0 0 18 0" />
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <path d="m7 10 5 5 5-5M12 15V3" />
+      </symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <path d="m17 8-5-5-5 5M12 3v12" />
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+        <path d="M21 3v5h-5" />
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+        <path d="M8 16H3v5" />
+      </symbol>
+      <symbol id="i-file-text" viewBox="0 0 24 24">
+        <path
+          d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
+        />
+        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+      </symbol>
+      <symbol id="i-folder-open" viewBox="0 0 24 24">
+        <path
+          d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"
+        />
+      </symbol>
+      <symbol id="i-link" viewBox="0 0 24 24">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+        <path
+          d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+        />
+      </symbol>
+      <symbol id="i-unlink" viewBox="0 0 24 24">
+        <path
+          d="m18.84 12.25 1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71M5.17 11.75l-1.71 1.71a5 5 0 0 0 7.07 7.07l1.71-1.71M8 2v3M2 8h3M16 22v-3M22 16h-3"
+        />
+      </symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24">
+        <path
+          d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
+        />
+        <path d="M12 9v4M12 17h.01" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="M20 6 9 17l-5-5" />
+      </symbol>
+      <symbol id="i-check-circle" viewBox="0 0 24 24">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <path d="M22 4 12 14.01l-3-3" />
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4M12 8h.01" />
+      </symbol>
+      <symbol id="i-archive" viewBox="0 0 24 24">
+        <rect width="20" height="5" x="2" y="3" rx="1" />
+        <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4" />
+      </symbol>
+      <symbol id="i-dashboard" viewBox="0 0 24 24">
+        <rect width="7" height="9" x="3" y="3" rx="1" />
+        <rect width="7" height="5" x="14" y="3" rx="1" />
+        <rect width="7" height="9" x="14" y="12" rx="1" />
+        <rect width="7" height="5" x="3" y="16" rx="1" />
+      </symbol>
+      <symbol id="i-clipboard" viewBox="0 0 24 24">
+        <rect width="8" height="4" x="8" y="2" rx="1" />
+        <path
+          d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01"
+        />
+      </symbol>
+      <symbol id="i-message" viewBox="0 0 24 24">
+        <path
+          d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+        />
+      </symbol>
+      <symbol id="i-eraser" viewBox="0 0 24 24">
+        <path
+          d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21M22 21H7M5 11l9 9"
+        />
+      </symbol>
+      <symbol id="i-help" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
+      </symbol>
+      <symbol id="i-book" viewBox="0 0 24 24">
+        <path
+          d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
+        />
+      </symbol>
+      <symbol id="i-chevron-left" viewBox="0 0 24 24">
+        <path d="m15 18-6-6 6-6" />
+      </symbol>
+      <symbol id="i-chevron-right" viewBox="0 0 24 24">
+        <path d="m9 18 6-6-6-6" />
+      </symbol>
+      <symbol id="i-bold" viewBox="0 0 24 24">
+        <path d="M6 12h9a4 4 0 0 1 0 8H6V4h8a4 4 0 0 1 0 8" />
+      </symbol>
+      <symbol id="i-italic" viewBox="0 0 24 24">
+        <path d="M19 4h-9M14 20H5M15 4 9 20" />
+      </symbol>
+      <symbol id="i-underline" viewBox="0 0 24 24">
+        <path d="M6 4v6a6 6 0 0 0 12 0V4M4 20h16" />
+      </symbol>
+      <symbol id="i-strike" viewBox="0 0 24 24">
+        <path d="M16 4H9a3 3 0 0 0-2.83 4M14 12a4 4 0 0 1 0 8H6M4 12h16" />
+      </symbol>
+      <symbol id="i-list" viewBox="0 0 24 24">
+        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+      </symbol>
+      <symbol id="i-list-ol" viewBox="0 0 24 24">
+        <path
+          d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"
+        />
+      </symbol>
+      <symbol id="i-quote" viewBox="0 0 24 24">
+        <path
+          d="M3 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2H4c-1.25 0-2 .75-2 1.97V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .01-1 1.03V20c0 1 0 1 1 1z"
+        />
+        <path
+          d="M15 21c3 0 7-1 7-8V5c0-1.25-.76-2.02-2-2h-4c-1.25 0-2 .75-2 1.97V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"
+        />
+      </symbol>
+      <symbol id="i-undo" viewBox="0 0 24 24">
+        <path d="M3 7v6h6" />
+        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+      </symbol>
+      <symbol id="i-redo" viewBox="0 0 24 24">
+        <path d="M21 7v6h-6" />
+        <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7" />
+      </symbol>
+      <symbol id="i-id" viewBox="0 0 24 24">
+        <rect width="20" height="16" x="2" y="4" rx="2" />
+        <circle cx="8" cy="11" r="2" />
+        <path d="M5 16a3 3 0 0 1 6 0M14 9h5M14 13h5" />
+      </symbol>
+      <symbol id="i-briefcase" viewBox="0 0 24 24">
+        <rect width="20" height="14" x="2" y="7" rx="2" />
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+      </symbol>
+      <symbol id="i-timer" viewBox="0 0 24 24">
+        <path d="M10 2h4M12 14l3-3" />
+        <circle cx="12" cy="14" r="8" />
+      </symbol>
+      <symbol id="i-star" viewBox="0 0 24 24">
+        <path
+          d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+        />
+      </symbol>
+      <symbol id="i-swap" viewBox="0 0 24 24">
+        <path d="m16 3 4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16" />
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+      </symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24">
+        <path
+          d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"
+        />
+      </symbol>
+      <symbol id="i-coffee" viewBox="0 0 24 24">
+        <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+        <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+        <path d="M6 2v2M10 2v2M14 2v2" />
+      </symbol>
+      <symbol id="i-clear-format" viewBox="0 0 24 24">
+        <path d="M4 7V4h16v3M5 20h6M13 4 8 20M15 15l5 5M20 15l-5 5" />
+      </symbol>
+    </svg>
+
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <!-- ================================================================
+     TELA DE LOGIN
+     ================================================================ -->
+    <main id="tela-login" class="login" hidden>
+      <button
+        type="button"
+        class="btn-icon btn-vidro login-theme"
+        data-theme-toggle
+        aria-label="Alternar tema"
+      >
+        <svg class="icon icon-sun" aria-hidden="true">
+          <use href="#i-sun" />
+        </svg>
+        <svg class="icon icon-moon" aria-hidden="true">
+          <use href="#i-moon" />
+        </svg>
+      </button>
+
+      <section class="login-card" aria-labelledby="login-titulo">
+        <img
+          src="images/Logo29.PNG"
+          alt="Brasão do 29º Batalhão de Polícia Militar"
+          class="login-brasao"
+          width="88"
+          height="100"
+        />
+        <h1 id="login-titulo" class="login-titulo">Escala P5</h1>
+        <p class="login-sub">Comunicação Social • 29º BPM</p>
+
+        <form id="form-login" class="form-login" novalidate autocomplete="off">
+          <div class="field">
+            <label class="field-label" for="login-usuario">Usuário</label>
+            <div class="input-icon">
+              <svg class="icon" aria-hidden="true"><use href="#i-user" /></svg>
+              <input
+                id="login-usuario"
+                name="usuario"
+                type="text"
+                required
+                autocapitalize="off"
+                spellcheck="false"
+                autocomplete="username"
+                maxlength="40"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="login-senha">Senha</label>
+            <div class="input-icon">
+              <svg class="icon" aria-hidden="true"><use href="#i-lock" /></svg>
+              <input
+                id="login-senha"
+                name="senha"
+                type="password"
+                required
+                autocomplete="current-password"
+                maxlength="64"
+              />
+              <button
+                type="button"
+                class="input-action"
+                id="btn-ver-senha"
+                aria-label="Mostrar senha"
+                aria-pressed="false"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#i-eye" /></svg>
+              </button>
+            </div>
+          </div>
+
+          <p id="login-erro" class="alert alert-danger" role="alert" hidden></p>
+
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            id="btn-entrar"
+          >
+            <svg class="icon" aria-hidden="true"><use href="#i-login" /></svg>
+            Entrar
+          </button>
+        </form>
+
+        <p class="login-nota">
+          <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+          Acesso restrito à Seção de Relações Públicas.
+        </p>
+      </section>
+    </main>
+
+    <!-- ================================================================
+     DASHBOARD ADMINISTRATIVO
+     ================================================================ -->
+    <div id="tela-app" class="app" hidden>
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="marca">
+            <img
+              src="images/Logo29.PNG"
+              alt=""
+              class="marca-brasao"
+              width="36"
+              height="41"
+            />
+            <div>
+              <strong class="marca-titulo">Escala P5</strong>
+              <span class="marca-sub">Comunicação Social • 29º BPM</span>
+            </div>
+          </div>
+
+          <div class="topbar-acoes">
+            <button
+              type="button"
+              id="status-db"
+              class="pill"
+              aria-live="polite"
+              title="Situação do arquivo db.txt"
+            >
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-database" />
+              </svg>
+              <span data-texto>Carregando…</span>
+            </button>
+            <span class="pill pill-user">
+              <svg class="icon" aria-hidden="true"><use href="#i-user" /></svg>
+              <span id="usuario-logado">—</span>
+            </span>
+            <button
+              type="button"
+              class="btn-icon btn-vidro"
+              data-theme-toggle
+              aria-label="Alternar tema"
+            >
+              <svg class="icon icon-sun" aria-hidden="true">
+                <use href="#i-sun" />
+              </svg>
+              <svg class="icon icon-moon" aria-hidden="true">
+                <use href="#i-moon" />
+              </svg>
+            </button>
+            <button type="button" class="btn btn-sair btn-sm" id="btn-sair">
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-logout" />
+              </svg>
+              Sair
+            </button>
+          </div>
+        </div>
+
+        <nav class="tabs" aria-label="Seções do sistema">
+          <div class="tabs-trilho">
+            <span class="tabs-indicador" aria-hidden="true"></span>
+            <button type="button" class="tab" data-view="painel">
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-dashboard" />
+              </svg>
+              Painel
+            </button>
+            <button type="button" class="tab" data-view="lancar">
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-clipboard" />
+              </svg>
+              Lançamentos
+            </button>
+            <button type="button" class="tab" data-view="consultas">
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-search" />
+              </svg>
+              Consultas
+            </button>
+            <button type="button" class="tab" data-view="banco">
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-database" />
+              </svg>
+              Banco db.txt
+            </button>
+            <button type="button" class="tab" data-view="ajuda">
+              <svg class="icon" aria-hidden="true"><use href="#i-help" /></svg>
+              Modo de usar
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      <main id="conteudo" class="container" tabindex="-1">
+        <!-- ============ PAINEL ============ -->
+        <section id="view-painel" class="view" aria-labelledby="painel-titulo">
+          <h2 id="painel-titulo" class="sr-only">Painel</h2>
+          <div class="stats" id="painel-stats"></div>
+          <article
+            class="escala"
+            id="painel-escala"
+            aria-live="polite"
+          ></article>
+        </section>
+
+        <!-- ============ LANÇAMENTOS (formulário + tabela) ============ -->
+        <section
+          id="view-lancar"
+          class="view"
+          hidden
+          aria-labelledby="lancar-titulo"
+        >
+          <div class="view-head">
+            <div>
+              <h2 id="lancar-titulo" class="view-titulo">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-clipboard" />
+                </svg>
+                Lançamentos da escala
+              </h2>
+              <p class="view-desc">
+                Inclua, altere ou exclua lançamentos. Cada operação é gravada na
+                hora no arquivo <code>db.txt</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="lancar-grid">
+            <!-- Formulário único de inclusão/edição -->
+            <form
+              id="form-registro"
+              class="card form-registro"
+              novalidate
+              aria-labelledby="form-titulo"
+            >
+              <header class="form-head">
+                <h3 id="form-titulo" class="card-titulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-user-plus" />
+                  </svg>
+                  <span data-texto>Novo lançamento</span>
+                </h3>
+                <span id="badge-edicao" class="badge badge-edicao" hidden>
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-edit" />
+                  </svg>
+                  Editando
+                </span>
+              </header>
+
+              <div
+                id="form-erros"
+                class="alert alert-danger"
+                role="alert"
+                tabindex="-1"
+                hidden
+              ></div>
+
+              <fieldset class="field">
+                <legend class="field-label">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-calendar-week" />
+                  </svg>
+                  Semana <span class="req" aria-hidden="true">*</span>
+                </legend>
+                <div class="segmentado" role="radiogroup">
+                  <label class="segmento"
+                    ><input type="radio" name="semana" value="1" checked /><span
+                      >Semana 1</span
+                    ></label
+                  >
+                  <label class="segmento"
+                    ><input type="radio" name="semana" value="2" /><span
+                      >Semana 2</span
+                    ></label
+                  >
+                </div>
+              </fieldset>
+
+              <div class="field">
+                <label class="field-label" for="r-tipo"
+                  >Tipo de escala
+                  <span class="req" aria-hidden="true">*</span></label
+                >
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true" id="r-tipo-icone">
+                    <use href="#i-briefcase" />
+                  </svg>
+                  <select id="r-tipo" name="tipo" required data-tipos></select>
+                </div>
+              </div>
+
+              <div class="grid grid-2">
+                <div class="field">
+                  <label class="field-label" for="r-inicio"
+                    >Data Início
+                    <span class="req" aria-hidden="true">*</span></label
+                  >
+                  <div class="input-icon input-date">
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#i-calendar" />
+                    </svg>
+                    <input id="r-inicio" name="inicio" type="date" required />
+                  </div>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="r-termino"
+                    >Data Término
+                    <span class="req" aria-hidden="true">*</span></label
+                  >
+                  <div class="input-icon input-date">
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#i-calendar" />
+                    </svg>
+                    <input id="r-termino" name="termino" type="date" required />
+                  </div>
+                </div>
+              </div>
+              <p
+                class="hint hint-periodo"
+                id="r-periodo"
+                aria-live="polite"
+              ></p>
+
+              <div class="field">
+                <label class="field-label" for="r-grad"
+                  >Graduação
+                  <span class="req" aria-hidden="true">*</span></label
+                >
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-rank" />
+                  </svg>
+                  <select id="r-grad" name="grad" required data-graduacoes>
+                    <option value="">Selecione a graduação…</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="r-rg"
+                  >RG Militar
+                  <span class="req" aria-hidden="true">*</span></label
+                >
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-id" />
+                  </svg>
+                  <input
+                    id="r-rg"
+                    name="rg"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="[0-9]{5,6}"
+                    required
+                    minlength="5"
+                    maxlength="6"
+                    list="lista-rgs"
+                    autocomplete="off"
+                    placeholder="5 a 6 dígitos"
+                  />
+                  <datalist id="lista-rgs"></datalist>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="r-nome"
+                  >Nome Farda
+                  <span class="req" aria-hidden="true">*</span></label
+                >
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-badge" />
+                  </svg>
+                  <input
+                    id="r-nome"
+                    name="nome"
+                    type="text"
+                    required
+                    maxlength="60"
+                    list="lista-nomes"
+                    autocomplete="off"
+                    autocapitalize="characters"
+                    data-maiusculas
+                    placeholder="EX.: SUZANO"
+                  />
+                  <datalist id="lista-nomes"></datalist>
+                </div>
+                <span class="hint"
+                  >Digite um RG ou nome já lançado para preencher os demais
+                  campos automaticamente.</span
+                >
+              </div>
+
+              <div class="field">
+                <span class="field-label" id="r-obs-rotulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-message" />
+                  </svg>
+                  Observações
+                </span>
+                <div class="rte" id="editor-obs">
+                  <div
+                    class="rte-barra"
+                    role="toolbar"
+                    aria-label="Formatação das observações"
+                  >
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="bold"
+                      aria-pressed="false"
+                      title="Negrito (Ctrl+B)"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-bold" /></svg
+                      ><span class="sr-only">Negrito</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="italic"
+                      aria-pressed="false"
+                      title="Itálico (Ctrl+I)"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-italic" /></svg
+                      ><span class="sr-only">Itálico</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="underline"
+                      aria-pressed="false"
+                      title="Sublinhado (Ctrl+U)"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-underline" /></svg
+                      ><span class="sr-only">Sublinhado</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="strikeThrough"
+                      aria-pressed="false"
+                      title="Tachado"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-strike" /></svg
+                      ><span class="sr-only">Tachado</span>
+                    </button>
+                    <span class="rte-sep" aria-hidden="true"></span>
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="insertUnorderedList"
+                      aria-pressed="false"
+                      title="Lista com marcadores (Ctrl+Shift+8)"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-list" /></svg
+                      ><span class="sr-only">Lista com marcadores</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="insertOrderedList"
+                      aria-pressed="false"
+                      title="Lista numerada (Ctrl+Shift+7)"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-list-ol" /></svg
+                      ><span class="sr-only">Lista numerada</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="formatBlock"
+                      data-valor="blockquote"
+                      title="Citação / destaque"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-quote" /></svg
+                      ><span class="sr-only">Citação</span>
+                    </button>
+                    <span class="rte-sep" aria-hidden="true"></span>
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="undo"
+                      title="Desfazer (Ctrl+Z)"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-undo" /></svg
+                      ><span class="sr-only">Desfazer</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="redo"
+                      title="Refazer (Ctrl+Y)"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-redo" /></svg
+                      ><span class="sr-only">Refazer</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="rte-btn"
+                      data-cmd="removeFormat"
+                      title="Limpar formatação"
+                    >
+                      <svg class="icon" aria-hidden="true">
+                        <use href="#i-clear-format" /></svg
+                      ><span class="sr-only">Limpar formatação</span>
+                    </button>
+                  </div>
+                  <div
+                    class="rte-area rte-vazio"
+                    data-rte-area
+                    contenteditable="true"
+                    role="textbox"
+                    aria-multiline="true"
+                    aria-labelledby="r-obs-rotulo"
+                    data-placeholder="TROCAS, DISPENSAS, EVENTOS, COBERTURAS…"
+                    spellcheck="true"
+                  ></div>
+                  <span class="rte-contador" data-rte-contador>0 / 5000</span>
+                </div>
+              </div>
+
+              <div class="form-acoes">
+                <button type="button" class="btn btn-ghost" id="btn-limpar">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-eraser" />
+                  </svg>
+                  <span data-texto>Limpar</span>
+                </button>
+                <button type="submit" class="btn btn-primary" id="btn-salvar">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-save" />
+                  </svg>
+                  <span data-texto>Incluir</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- Tabela da escala -->
+            <section class="card tabela-card" aria-labelledby="tabela-titulo">
+              <header class="tabela-head">
+                <h3 id="tabela-titulo" class="card-titulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-calendar-week" />
+                  </svg>
+                  Escala lançada
+                  <span class="badge badge-contagem" id="tabela-contagem"
+                    >0</span
+                  >
+                </h3>
+                <div class="tabela-filtros">
+                  <div class="input-icon input-busca">
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#i-search" />
+                    </svg>
+                    <input
+                      id="t-busca"
+                      type="search"
+                      data-maiusculas
+                      autocapitalize="characters"
+                      placeholder="BUSCAR NOME, RG OU GRADUAÇÃO"
+                      aria-label="Buscar na escala"
+                      autocomplete="off"
+                    />
+                  </div>
+                  <div
+                    class="segmentado segmentado-sm"
+                    role="radiogroup"
+                    aria-label="Filtrar por semana"
+                  >
+                    <label class="segmento"
+                      ><input
+                        type="radio"
+                        name="t-semana"
+                        value=""
+                        checked
+                      /><span>Todas</span></label
+                    >
+                    <label class="segmento"
+                      ><input type="radio" name="t-semana" value="1" /><span
+                        >S1</span
+                      ></label
+                    >
+                    <label class="segmento"
+                      ><input type="radio" name="t-semana" value="2" /><span
+                        >S2</span
+                      ></label
+                    >
+                  </div>
+                </div>
+              </header>
+              <div id="tabela-escala" aria-live="polite"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ============ CONSULTAS ============ -->
+        <section
+          id="view-consultas"
+          class="view"
+          hidden
+          aria-labelledby="consultas-titulo"
+        >
+          <div class="view-head">
+            <div>
+              <h2 id="consultas-titulo" class="view-titulo">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-search" />
+                </svg>
+                Consultas e relatórios
+              </h2>
+              <p class="view-desc">
+                Filtre por data, semana, policial ou graduação. Imprima cada
+                lançamento, a consulta filtrada ou o relatório geral em A4.
+              </p>
+            </div>
+          </div>
+
+          <form id="form-filtros" class="card filtros" role="search">
+            <div class="grid grid-5">
+              <div class="field">
+                <label class="field-label" for="f-de">Data inicial</label>
+                <div class="input-icon input-date">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-calendar" />
+                  </svg>
+                  <input id="f-de" name="de" type="date" />
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="f-ate">Data final</label>
+                <div class="input-icon input-date">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-calendar" />
+                  </svg>
+                  <input id="f-ate" name="ate" type="date" />
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="f-semana">Semana</label>
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-calendar-week" />
+                  </svg>
+                  <select id="f-semana" name="semana">
+                    <option value="">Todas</option>
+                    <option value="1">Semana 1</option>
+                    <option value="2">Semana 2</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="f-policial">Policial</label>
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-badge" />
+                  </svg>
+                  <select id="f-policial" name="policial">
+                    <option value="">Todos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="f-tipo">Tipo de escala</label>
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-timer" />
+                  </svg>
+                  <select id="f-tipo" name="tipo" data-tipos>
+                    <option value="">Todos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="f-grad">Graduação</label>
+                <div class="input-icon">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-rank" />
+                  </svg>
+                  <select id="f-grad" name="grad" data-graduacoes>
+                    <option value="">Todas</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="filtros-acoes">
+              <p
+                class="hint"
+                id="consulta-resumo"
+                role="status"
+                aria-live="polite"
+              ></p>
+              <div class="btn-group">
+                <button type="reset" class="btn btn-ghost">
+                  <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+                  Limpar filtros
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline"
+                  id="btn-print-consulta"
+                >
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-printer" />
+                  </svg>
+                  Imprimir consulta
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="btn-print-geral"
+                >
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-file-text" />
+                  </svg>
+                  Relatório geral
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div class="card tabela-card" id="resultados"></div>
+        </section>
+
+        <!-- ============ BANCO ============ -->
+        <section
+          id="view-banco"
+          class="view"
+          hidden
+          aria-labelledby="banco-titulo"
+        >
+          <div class="view-head">
+            <div>
+              <h2 id="banco-titulo" class="view-titulo">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-database" />
+                </svg>
+                Banco de dados db.txt
+              </h2>
+              <p class="view-desc">
+                Arquivo <code>db-local-txt/db.txt</code>. Com o arquivo
+                vinculado, toda inclusão, alteração e exclusão é gravada
+                imediatamente nele.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-2 grid-gap">
+            <div class="card">
+              <h3 class="card-titulo">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-link" />
+                </svg>
+                Vínculo com o arquivo
+              </h3>
+              <dl class="kv" id="banco-estado"></dl>
+              <div class="btn-group">
+                <button type="button" class="btn btn-primary" id="btn-vincular">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-folder-open" />
+                  </svg>
+                  <span data-texto>Vincular db.txt</span>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline"
+                  id="btn-desvincular"
+                >
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-unlink" />
+                  </svg>
+                  Desvincular
+                </button>
+              </div>
+              <p class="hint" id="banco-suporte"></p>
+            </div>
+
+            <div class="card">
+              <h3 class="card-titulo">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-refresh" />
+                </svg>
+                Cópias e sincronização
+              </h3>
+              <p class="texto">
+                Baixe uma cópia, importe outro db.txt ou busque a versão
+                publicada no servidor. Em cada registro, prevalece a versão mais
+                recente.
+              </p>
+              <div class="btn-group">
+                <button type="button" class="btn btn-outline" id="btn-baixar">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-download" />
+                  </svg>
+                  Baixar db.txt
+                </button>
+                <label class="btn btn-outline" for="input-importar">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-upload" />
+                  </svg>
+                  Importar .txt
+                </label>
+                <input
+                  id="input-importar"
+                  type="file"
+                  accept=".txt,text/plain"
+                  class="sr-only"
+                />
+                <button
+                  type="button"
+                  class="btn btn-outline"
+                  id="btn-recarregar"
+                >
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-refresh" />
+                  </svg>
+                  Do servidor
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card-titulo">
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-file-text" />
+              </svg>
+              Conteúdo atual do db.txt
+            </h3>
+            <pre
+              class="txt-preview"
+              id="banco-preview"
+              tabindex="0"
+              aria-label="Pré-visualização do arquivo db.txt"
+            ></pre>
+          </div>
+        </section>
+
+        <!-- ============ MODO DE USAR ============ -->
+        <section
+          id="view-ajuda"
+          class="view"
+          hidden
+          aria-labelledby="ajuda-titulo"
+        >
+          <div class="view-head">
+            <div>
+              <h2 id="ajuda-titulo" class="view-titulo">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-book" />
+                </svg>
+                Modo de usar
+              </h2>
+              <p class="view-desc">
+                Passo a passo para lançar, consultar, imprimir e guardar a
+                escala da P5.
+              </p>
+            </div>
+          </div>
+
+          <ol class="passos">
+            <li class="card passo">
+              <span class="passo-num" aria-hidden="true">1</span>
+              <div>
+                <h3 class="card-titulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-database" />
+                  </svg>
+                  Abra o sistema pelo servidor local
+                </h3>
+                <p class="texto">
+                  No VS Code, pressione <strong>Ctrl+Shift+B</strong> (ou rode
+                  <code>node servidor.js</code> no terminal) e acesse
+                  <code>http://127.0.0.1:5510/</code>. Assim, cada inclusão,
+                  alteração e exclusão é gravada direto em
+                  <code>db-local-txt/db.txt</code>, sem janelas, com um aviso
+                  de confirmação.
+                </p>
+                <p class="hint">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-info" />
+                  </svg>
+                  O indicador verde <strong>db.txt gravando</strong> no topo
+                  confirma a gravação direta. Se aparecer
+                  <strong>Só no navegador</strong>, o sistema não foi aberto
+                  pelo servidor.
+                </p>
+              </div>
+            </li>
+            <li class="card passo">
+              <span class="passo-num" aria-hidden="true">2</span>
+              <div>
+                <h3 class="card-titulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-user-plus" />
+                  </svg>
+                  Inclua um lançamento
+                </h3>
+                <p class="texto">
+                  Em <strong>Lançamentos</strong>, escolha a
+                  <strong>Semana</strong> e o
+                  <strong>Tipo de escala</strong> (Expediente, 12, 24 ou 48
+                  horas, Feriado, Troca, Sobreaviso, Ponto facultativo ou
+                  Folga). A Data Início é sugerida automaticamente
+                  (a próxima segunda-feira) e os calendários só aceitam datas
+                  de hoje em diante e a Data Término é
+                  preenchida com 7 dias. Depois selecione a
+                  <strong>Graduação</strong>, informe o
+                  <strong>RG Militar</strong> e o
+                  <strong>Nome Farda</strong> (um RG já usado preenche o resto
+                  sozinho) e, se precisar, as
+                  <strong>Observações</strong>. Clique em
+                  <strong>Incluir</strong>.
+                </p>
+              </div>
+            </li>
+            <li class="card passo">
+              <span class="passo-num" aria-hidden="true">3</span>
+              <div>
+                <h3 class="card-titulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-message" />
+                  </svg>
+                  Formate as observações
+                </h3>
+                <p class="texto">
+                  O editor aceita <strong>negrito</strong>, <em>itálico</em>,
+                  sublinhado, tachado, listas e citação. Texto colado de outros
+                  programas é limpo automaticamente.
+                </p>
+              </div>
+            </li>
+            <li class="card passo">
+              <span class="passo-num" aria-hidden="true">4</span>
+              <div>
+                <h3 class="card-titulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-edit" />
+                  </svg>
+                  Altere ou exclua
+                </h3>
+                <p class="texto">
+                  Na tabela ao lado do formulário, use
+                  <strong>Editar</strong> para carregar o lançamento no
+                  formulário e <strong>Salvar alterações</strong>, ou
+                  <strong>Excluir</strong> para remover. O <code>db.txt</code> é
+                  atualizado no mesmo instante.
+                </p>
+              </div>
+            </li>
+            <li class="card passo">
+              <span class="passo-num" aria-hidden="true">5</span>
+              <div>
+                <h3 class="card-titulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-printer" />
+                  </svg>
+                  Consulte e imprima em PDF (A4)
+                </h3>
+                <p class="texto">
+                  Em <strong>Consultas</strong>, filtre por data, semana, tipo
+                  de escala, policial ou graduação. Imprima um lançamento, a
+                  consulta ou o <strong>Relatório geral</strong>. Na janela de
+                  impressão, escolha <strong>Salvar como PDF</strong> e papel
+                  <strong>A4</strong>, e desmarque
+                  <strong>Cabeçalhos e rodapés</strong>.
+                </p>
+              </div>
+            </li>
+            <li class="card passo">
+              <span class="passo-num" aria-hidden="true">6</span>
+              <div>
+                <h3 class="card-titulo">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-logout" />
+                  </svg>
+                  Saia do sistema
+                </h3>
+                <p class="texto">
+                  Clique em <strong>Sair</strong> ao terminar. A sessão e os
+                  tokens do navegador são eliminados. Depois de 30 minutos sem
+                  uso, a sessão expira sozinha.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+        29º BPM • Comunicação Social • P5
+      </footer>
+    </div>
+
+    <!-- ================================================================
+     MODAL / NOTIFICAÇÕES / ÁREA DE IMPRESSÃO
+     ================================================================ -->
+    <dialog
+      id="dialogo"
+      class="dialogo"
+      aria-labelledby="dialogo-titulo"
+      aria-describedby="dialogo-texto"
+    >
+      <form method="dialog" class="dialogo-corpo">
+        <div class="dialogo-icone">
+          <svg class="icon" aria-hidden="true"><use href="#i-alert" /></svg>
+        </div>
+        <h2 id="dialogo-titulo" class="dialogo-titulo">Confirmar</h2>
+        <p id="dialogo-texto" class="dialogo-texto"></p>
+        <div class="dialogo-acoes">
+          <button value="cancelar" class="btn btn-ghost">Cancelar</button>
+          <button value="ok" class="btn btn-danger" id="dialogo-ok">
+            <span data-texto>Confirmar</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+
+    <div id="print-area" class="print-area" aria-hidden="true"></div>
+
+    <script src="js/config.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/editor.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/db.js" defer></script>
+    <script src="js/report.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>

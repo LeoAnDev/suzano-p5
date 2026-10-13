@@ -1,0 +1,7 @@
+# Arquivo temporário da gravação atômica do servidor local
+db-local-txt/*.tmp
+
+# Sistema / editores
+node_modules/
+.DS_Store
+Thumbs.db

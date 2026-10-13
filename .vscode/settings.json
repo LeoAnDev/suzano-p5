@@ -1,0 +1,7 @@
+{
+  "liveServer.settings.ignoreFiles": [
+    ".vscode/**",
+    "db-local-txt/**",
+    "**/*.md"
+  ]
+}
