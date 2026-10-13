@@ -2,21 +2,15 @@
 #  DB-LOCAL-TXT • ESCALA P5 • COMUNICAÇÃO SOCIAL • 29º BPM
 #  Cada registro tem um bloco legível e uma linha "@registro" (JSON),
 #  que é a parte lida pelo sistema. Não altere a estrutura dessa linha.
-#  Atualizado em: 13/10/2026 15:13   |   Registros: 3   |   Períodos: 2
+#  Atualizado em: 13/10/2026 15:14   |   Registros: 3   |   Períodos: 3
 ########################################################################
 
 ========================================================================
   SEMANA 1  •  13/10/2026 (Terça-feira) a 18/10/2026 (Domingo)
-  Efetivo: 2 policial(is)
+  Efetivo: 1 policial(is)
 ========================================================================
 
-  [0001]  SUBTEN PM   RG 75514     ARANTES                Tipo: Expediente
-          ID: e-c0bf6fe50beb0ff9   |   Criado: 13/10/2026 15:13   |   Atualizado: 13/10/2026 15:13
-          Observações: —
-@registro {"id":"e-c0bf6fe50beb0ff9","semana":1,"tipo":"expediente","inicio":"2026-10-13","termino":"2026-10-18","grad":"SUBTEN PM","rg":"75514","nome":"ARANTES","observacoes":"","criadoEm":1791915220474,"atualizadoEm":1791915220474}
-  ----------------------------------------------------------------------
-
-  [0002]  SUBTEN PM   RG 75501     L. OLIVEIRA            Tipo: Expediente
+  [0001]  SUBTEN PM   RG 75501     L. OLIVEIRA            Tipo: Expediente
           ID: e-4c31a1b8d5c1d918   |   Criado: 13/10/2026 15:13   |   Atualizado: 13/10/2026 15:13
           Observações: —
 @registro {"id":"e-4c31a1b8d5c1d918","semana":1,"tipo":"expediente","inicio":"2026-10-13","termino":"2026-10-18","grad":"SUBTEN PM","rg":"75501","nome":"L. OLIVEIRA","observacoes":"","criadoEm":1791915204116,"atualizadoEm":1791915204116}
@@ -27,10 +21,21 @@
   Efetivo: 1 policial(is)
 ========================================================================
 
-  [0003]  SUBTEN PM   RG 75513     LEONARDO               Tipo: Expediente
+  [0002]  SUBTEN PM   RG 75513     LEONARDO               Tipo: Expediente
           ID: e-92a0cbbc10279c9c   |   Criado: 13/10/2026 15:13   |   Atualizado: 13/10/2026 15:13
           Observações: —
 @registro {"id":"e-92a0cbbc10279c9c","semana":1,"tipo":"expediente","inicio":"2026-10-13","termino":"2026-10-16","grad":"SUBTEN PM","rg":"75513","nome":"LEONARDO","observacoes":"","criadoEm":1791915191382,"atualizadoEm":1791915235518}
+  ----------------------------------------------------------------------
+
+========================================================================
+  SEMANA 2  •  19/10/2026 (Segunda-feira) a 23/10/2026 (Sexta-feira)
+  Efetivo: 1 policial(is)
+========================================================================
+
+  [0003]  SUBTEN PM   RG 75514     ARANTES                Tipo: Expediente
+          ID: e-c0bf6fe50beb0ff9   |   Criado: 13/10/2026 15:13   |   Atualizado: 13/10/2026 15:14
+          Observações: —
+@registro {"id":"e-c0bf6fe50beb0ff9","semana":2,"tipo":"expediente","inicio":"2026-10-19","termino":"2026-10-23","grad":"SUBTEN PM","rg":"75514","nome":"ARANTES","observacoes":"","criadoEm":1791915220474,"atualizadoEm":1791915250190}
   ----------------------------------------------------------------------
 
 # FIM DO ARQUIVO
